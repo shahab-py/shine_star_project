@@ -31,7 +31,7 @@ def cart_add(request, product_id):
 
 def cart_detail(request):
     cart = Cart(request)
-    return render(request, 'shop/cart_detail.html', {'cart': cart})
+    return render(request, 'shop/templatetags/price_tags.html', {'cart': cart})
 
 
 def cart_remove(request, product_id):

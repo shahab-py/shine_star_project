@@ -9,14 +9,18 @@ class Cart:
             cart = self.session['cart'] = {}
         self.cart = cart
 
+
+    """
     @property
     def items(self):
-        """
-        این همان قطعه گمشده است! 
-        با این کار، وقتی در views می‌گویی cart.items، 
-        دقیقاً مقادیر داخل سبد خرید را برمی‌گرداند.
-        """
+
         return self.cart.values()
+    """   
+
+    @property
+    def items(self):
+        return list(self.__iter__())
+
 
     def add(self, product, quantity=None, override_quantity=None):
         """اضافه کردن محصول یا تغییر مقدار آن"""
@@ -68,7 +72,9 @@ class Cart:
 
     def __len__(self):
         return sum(item['quantity'] for item in self.cart.values())
-
+    
+    
+    """
     def get_total_price(self):
         total = Decimal(0)
         for item in self.cart.values():
@@ -76,7 +82,18 @@ class Cart:
             quantity = item.get('quantity', 0)
             total += price * quantity
         return total
-
+    """
+   
+   
+    def get_total_price(self):
+        total = Decimal(0)
+        for item in self.__iter__():  # ← حالا از __iter__ استفاده می‌کنه
+            total += item['total_price']
+        return total
+   
+   
+   
+   
     def clear(self):
         if 'cart' in self.session:
             del self.session['cart']

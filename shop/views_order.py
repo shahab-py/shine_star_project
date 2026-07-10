@@ -4,6 +4,7 @@ from .forms import OrderCreateForm
 from .models import Order, OrderItem
 from .cart import Cart
 
+
 class OrderCreateView(FormView):
     template_name = 'shop/orders/create.html'
     form_class = OrderCreateForm
@@ -15,7 +16,6 @@ class OrderCreateView(FormView):
         if not cart:
             return super().form_valid(form)
 
-   
         order = Order.objects.create(
             first_name=form.cleaned_data['first_name'],
             last_name=form.cleaned_data['last_name'],
@@ -26,26 +26,22 @@ class OrderCreateView(FormView):
             phone_number=form.cleaned_data['phone_number'],
         )
 
-
-
-  
-        
-
-        return super().form_valid(form)
-    
-        for item in cart:
+               
+        for item in cart.items:
             order_item = OrderItem.objects.create(
                 order=order,
                 product=item['product'],
                 price=item['price'],
                 quantity=item['quantity']
             )
-  
+
             item['product'].stock -= item['quantity']
             item['product'].save()
 
-            cart.clear()
+        cart.clear()
 
+        return super().form_valid(form)
+    
 
 from django.views.generic import TemplateView
 

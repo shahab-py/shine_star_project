@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load price_tags %}
 
 {% block title %}صفحه اصلی | Shine Star{% endblock %}
 
@@ -40,7 +41,7 @@
                     <p class="text-muted small">{{ product.description|truncatewords:10 }}</p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <!-- نمایش قیمت -->
-                        <span class="text-primary fw-bold fs-5">{{ product.price }} تومان</span>
+                        <span class="text-primary fw-bold fs-5">{{ product.price|format_price }} تومان</span>
                         <a href="{% url 'cart_add' product.id %}" class="btn btn-outline-dark btn-sm">افزودن به سبد</a>
                     </div>
                 </div>

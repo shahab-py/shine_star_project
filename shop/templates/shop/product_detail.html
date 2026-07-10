@@ -1,58 +1,83 @@
 {% extends 'base.html' %}
+{% load price_tags %}
 
 {% block content %}
 <div class="container mt-5">
+    <!-- Breadcrumb - ساده و شیک -->
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">خانه</a></li>
-        <li class="breadcrumb-item active">{{ product.name }}</li>
+      <ol class="breadcrumb bg-transparent p-0">
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}" class="text-decoration-none">خانه</a></li>
+        <li class="breadcrumb-item active text-muted" aria-current="page">{{ product.name }}</li>
       </ol>
     </nav>
 
-    <div class="row">
+    <div class="row g-5"> <!-- اضافه کردن g-5 برای فاصله مناسب بین تصویر و متن -->
+        
         <!-- بخش تصویر محصول -->
-        <div class="col-md-6 mb-4">
-            <div class="card border-0 shadow-sm">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm overflow-hidden">
                 {% if product.image %}
-                    <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" style="max-height: 500px; width: 100%; object-fit: cover;">
+                    <img src="{{ product.image.url }}" class="img-fluid w-100" alt="{{ product.name }}" style="max-height: 550px; object-fit: cover;">
                 {% else %}
-                    <img src="https://via.placeholder.com/500" class="img-fluid rounded" alt="No Image">
+                    <img src="https://via.placeholder.com/500" class="img-fluid" alt="No Image">
                 {% endif %}
             </div>
         </div>
 
         <!-- بخش اطلاعات محصول -->
         <div class="col-md-6">
-            <h1 class="display-5 fw-bold">{{ product.name }}</h1>
-            <p class="text-muted mb-3">دسته‌بندی: {{ product.category }}</p>
-            
-            <h3 class="text-primary mb-4">{{ product.price }} تومان</h3>
-            
-            <div class="product-description mb-4">
-                <h5>توضیحات:</h5>
-                <p class="text-secondary" style="line-height: 1.8;">
-                    {{ product.description }}
-                </p>
-            </div>
-
-            <hr>
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-                    <form action="{% url 'cart_add' product.id %}" method="POST">
-                        {% csrf_token %}
-                        
-                        <button type="submit" class="btn btn-outline-secondary w-10 mt 8 btn-lg px-4 shadow-sm">
-                            <i class="bi bi-cart-plus"></i>
-                        </button>
-                    </form>
+            <div class="ps-md-4"> <!-- ایجاد فاصله از سمت چپ در حالت دسکتاپ برای زیبایی -->
+                <span class="badge bg-light text-secondary mb-2 px-3 py-2">{{ product.category }}</span>
+                <h1 class="display-6 fw-bold text-dark mb-3">{{ product.name }}</h1>
+                
+                <h2 class="text-primary fw-bold mb-4">{{ product.price|format_price }} <span class="fs-5 text-muted">تومان</span></h2>
+                
+                <div class="product-description mb-4">
+                    <h5 class="fw-bold mb-3">توضیحات محصول:</h5>
+                    <p class="text-secondary lh-lg" style="font-size: 1.1rem;">
+                        {{ product.description }}
+                    </p>
                 </div>
 
-                        <button type="submit" class="btn btn-outline-secondary w-10 mt 8 btn-lg shadow-sm">
-                            <i class="bi bi-heart"></i>
+                <hr class="my-4 opacity-25">
+
+                <!-- بخش دکمه‌های عملیاتی -->
+                <div class="d-flex gap-3 align-items-center">
+                    <!-- دکمه اصلی خرید -->
+                    <form action="{% url 'cart_add' product.id %}" method="POST" class="flex-grow-1">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm py-3 fw-bold">
+                            <i class="bi bi-cart-plus me-2"></i> افزودن به سبد خرید
                         </button>
+                    </form>
+
+                    <!-- دکمه علاقه‌مندی -->
+                    <button type="button" class="btn btn-outline-danger btn-lg px-4 shadow-sm">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+                
+                <!-- اطلاعات تکمیلی کوچک (اختیاری) -->
+                <div class="mt-5 d-flex gap-4 text-muted small">
+                    <span><i class="bi bi-truck me-1"></i> ارسال سریع</span>
+                    <span><i class="bi bi-shield-check me-1"></i> ضمانت اصالت</span>
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
+<style>
+    /* استایل برای بهبود ظاهر در صفحات مختلف */
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+    }
+    .btn-primary {
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3) !important;
+    }
+</style>
