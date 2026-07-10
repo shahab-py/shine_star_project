@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">خانه</a></li>
+        <li class="breadcrumb-item active">{{ product.name }}</li>
+      </ol>
+    </nav>
+
+    <div class="row">
+        <!-- بخش تصویر محصول -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" style="max-height: 500px; width: 100%; object-fit: cover;">
+                {% else %}
+                    <img src="https://via.placeholder.com/500" class="img-fluid rounded" alt="No Image">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- بخش اطلاعات محصول -->
+        <div class="col-md-6">
+            <h1 class="display-5 fw-bold">{{ product.name }}</h1>
+            <p class="text-muted mb-3">دسته‌بندی: {{ product.category }}</p>
+            
+            <h3 class="text-primary mb-4">{{ product.price }} تومان</h3>
+            
+            <div class="product-description mb-4">
+                <h5>توضیحات:</h5>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    {{ product.description }}
+                </p>
+            </div>
+
+            <hr>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
+                    <form action="{% url 'cart_add' product.id %}" method="POST">
+                        {% csrf_token %}
+                        
+                        <button type="submit" class="btn btn-outline-secondary w-10 mt 8 btn-lg px-4 shadow-sm">
+                            <i class="bi bi-cart-plus"></i>
+                        </button>
+                    </form>
+                </div>
+
+                        <button type="submit" class="btn btn-outline-secondary w-10 mt 8 btn-lg shadow-sm">
+                            <i class="bi bi-heart"></i>
+                        </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

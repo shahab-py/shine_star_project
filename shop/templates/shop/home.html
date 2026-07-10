@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}صفحه اصلی | Shine Star{% endblock %}
+
+{% block content %}
+
+<!-- ۱. بخش Hero (بنر اصلی و جذاب) -->
+<section class="hero-section text-white text-center py-5 mb-5" 
+         style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1350&q=80'); 
+                background-size: cover; 
+                background-position: center; 
+                border-radius: 15px;">
+    <div class="container py-5">
+        <h1 class="display-3 fw-bold">درخشش در استایل شما</h1>
+        <p class="lead mb-4">بهترین محصولات با بالاترین کیفیت در Shine Star منتظر شما هستند.</p>
+        <a href="#products" class="btn btn-warning btn-lg px-5 shadow">همین حالا خرید کنید</a>
+    </div>
+</section>
+
+<!-- ۲. بخش محصولات (Product Grid) -->
+<div id="products" class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">جدیدترین محصولات</h2>
+        <a href="{% url 'product_list' %}" class="text-decoration-none">مشاهده همه ←</a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for product in products %}
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0">
+                <!-- نمایش تصویر محصول از دیتابیس -->
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                {% else %}
+                    <img src="https://via.placeholder.com/500x250" class="card-img-top" alt="No Image" style="height: 250px; object-fit: cover;">
+                {% endif %}
+                
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">{{ product.name }}</h5>
+                    <p class="text-muted small">{{ product.description|truncatewords:10 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <!-- نمایش قیمت -->
+                        <span class="text-primary fw-bold fs-5">{{ product.price }} تومان</span>
+                        <a href="{% url 'cart_add' product.id %}" class="btn btn-outline-dark btn-sm">افزودن به سبد</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="text-muted">هنوز محصولی در فروشگاه Shine Star موجود نیست.</p>
+        </div>
+        {% endfor %}
+    </div> <!-- پایان row -->
+</div> <!-- پایان container -->
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-5 fw-bold">محصولات جدید Shine Star</h2>
+    
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <!-- شروع لینک: حالا کل کارت قابل کلیک است -->
+            <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
+                
+                <div class="card h-100 shadow-sm product-card border-0">
+                    <!-- بخش تصویر -->
+                    <div class="position-relative overflow-hidden">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/300x250" class="card-img-top" alt="No Image">
+                        {% endif %}
+                    </div>
+
+                    <!-- بخش متن و قیمت -->
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">{{ product.name }}</h5>
+                        <p class="card-text text-muted small">
+                            {{ product.description|truncatechars:60 }}
+                        </p>
+                        
+                        <!-- استفاده از mt-auto باعث می‌شود دکمه‌ها همیشه در پایین کارت قرار بگیرند حتی اگر متن‌ها طولشان فرق کند -->
+                        <div class="mt-auto text-center">
+                            <h6 class="text-primary fw-bold">{{ product.price }} تومان</h6>
+                            <button class="btn btn-outline-dark btn-sm w-100 mt-2">مشاهده جزئیات</button>
+                        </div>
+
+                <form action="{% url 'cart_add' product.id %}" method="POST">
+                    {% csrf_token %}
+                        
+                    <button type="submit" class="btn btn-outline-dark btn-sm w-100 mt-2">
+                        <i class="bi bi-cart-plus"></i>
+                    </button>
+                </form>
+                    </div>
+                </div>
+
+            </a> <!-- پایان لینک -->
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p class="alert alert-info">هیچ محصولی یافت نشد.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- استایل اضافی برای زیبایی بیشتر -->
+<style>
+    .product-card {
+        transition: transform 0.3s ease, shadow 0.3s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}
