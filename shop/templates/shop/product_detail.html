@@ -1,56 +1,180 @@
 {% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ product.name }} | Shine Star{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<style>
+    /* استایل‌های اختصاصی برای صفحه جزئیات محصول */
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        background-color: #fff;
+        transition: transform 0.3s ease;
+    }
+    
+    .product-image-container:hover {
+        transform: scale(1.02);
+    }
+
+    .product-image {
+        width: 100%;
+        height: auto;
+        max-height: 600px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .price-tag {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--shine-primary); /* استفاده از متغیر Rose Gold که در base تعریف کردید */
+    }
+
+    .category-badge {
+        background-color: var(--shine-pink);
+        color: var(--shine-primary);
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .btn-add-to-cart {
+        background-color: var(--shine-primary);
+        color: white;
+        border: none;
+        padding: 12px 35px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3);
+    }
+
+    .btn-add-to-cart:hover {
+        background-color: #c28e5a;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(212, 163, 115, 0.4);
+    }
+
+    .btn-wishlist {
+        border: 1px solid #ddd;
+        color: #888;
+        width: 55px;
+        height: 55px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-wishlist:hover {
+        color: #e74c3c;
+        border-color: #e74c3c;
+        background-color: #fff5f5;
+    }
+
+    .description-section {
+        background-color: white;
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--shine-primary);
+        text-decoration: none;
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">خانه</a></li>
-        <li class="breadcrumb-item active">{{ product.name }}</li>
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">خانه</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">محصولات</a></li>
+        <li class="breadcrumb-item active text-dark" aria-current="page">{{ product.name }}</li>
       </ol>
     </nav>
 
-    <div class="row">
+    <div class="row g-5">
         <!-- بخش تصویر محصول -->
-        <div class="col-md-6 mb-4">
-            <div class="card border-0 shadow-sm">
+        <div class="col-lg-6">
+            <div class="product-image-container shadow-sm">
                 {% if product.image %}
-                    <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" style="max-height: 500px; width: 100%; object-fit: cover;">
+                    <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}">
                 {% else %}
-                    <img src="https://via.placeholder.com/500" class="img-fluid rounded" alt="No Image">
+                    <img src="https://via.placeholder.com/600x600?text=No+Image" class="product-image" alt="No Image">
                 {% endif %}
             </div>
         </div>
 
         <!-- بخش اطلاعات محصول -->
-        <div class="col-md-6">
-            <h1 class="display-5 fw-bold">{{ product.name }}</h1>
-            <p class="text-muted mb-3">دسته‌بندی: {{ product.category }}</p>
-            
-            <h3 class="text-primary mb-4">{{ product.price }} تومان</h3>
-            
-            <div class="product-description mb-4">
-                <h5>توضیحات:</h5>
-                <p class="text-secondary" style="line-height: 1.8;">
-                    {{ product.description }}
-                </p>
-            </div>
-
-            <hr>
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-                    <form action="{% url 'cart_add' product.id %}" method="POST">
-                        {% csrf_token %}
-                        
-                        <button type="submit" class="btn btn-outline-secondary w-10 mt 8 btn-lg px-4 shadow-sm">
-                            <i class="bi bi-cart-plus"></i>
-                        </button>
-                    </form>
+        <div class="col-lg-6">
+            <div class="ps-lg-4">
+                <span class="category-badge">
+                    <i class="bi bi-tag-fill me-1"></i> {{ product.category }}
+                </span>
+                
+                <h1 class="display-6 fw-bold mb-3">{{ product.name }}</h1>
+                
+                <div class="price-tag mb-4">
+                    {{ product.price|floatformat:0|intcomma }} <span class="fs-6 text-muted">تومان</span>
+                </div>
+                
+                <div class="description-section mb-4">
+                    <h5 class="fw-bold mb-3 text-dark">توضیحات محصول</h5>
+                    <p class="text-secondary mb-0" style="line-height: 2;">
+                        {{ product.description|linebreaksbr }}
+                    </p>
                 </div>
 
-                        <button type="submit" class="btn btn-outline-secondary w-10 mt 8 btn-lg shadow-sm">
+                <hr class="my-4 opacity-25">
+
+                <!-- دکمه‌ها و عملیات خرید -->
+                <div class="row g-3 align-items-center">
+                    <div class="col-8 col-md-9">
+                        <form action="{% url 'cart_add' product.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-add-to-cart w-100">
+                                <i class="bi bi-cart-plus-fill me-2"></i> افزودن به سبد خرید
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-4 col-md-3">
+                        <button type="button" class="btn btn-wishlist w-100" title="افزودن به لیست علاقه‌مندی‌ها">
                             <i class="bi bi-heart"></i>
                         </button>
+                    </div>
+                </div>
+
+                <!-- ویژگی‌های جانبی (اختیاری برای جذابیت بیشتر) -->
+                <div class="mt-5 pt-4 border-top">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <i class="bi bi-truck fs-3 text-muted"></i>
+                            <p class="small mt-2">ارسال سریع</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-shield-check fs-3 text-muted"></i>
+                            <p class="small mt-2">ضمانت اصالت</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-arrow-repeat fs-3 text-muted"></i>
+                            <p class="small mt-2">مرجوعی آسان</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

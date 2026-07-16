@@ -11,15 +11,9 @@ class Cart:
 
     @property
     def items(self):
-        """
-        این همان قطعه گمشده است! 
-        با این کار، وقتی در views می‌گویی cart.items، 
-        دقیقاً مقادیر داخل سبد خرید را برمی‌گرداند.
-        """
-        return self.cart.values()
+        return list(self.__iter__())
 
     def add(self, product, quantity=None, override_quantity=None):
-        """اضافه کردن محصول یا تغییر مقدار آن"""
         product_id = str(product.id)
         
         if product_id not in self.cart:
