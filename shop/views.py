@@ -41,36 +41,27 @@ def cart_remove(request, product_id):
     return redirect('cart_detail')
 
 
-
-# shop/views.py
 def order_create(request):
     cart = Cart(request)
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
         if form.is_valid():
-            # ۱. ذخیره اطلاعات سفارش در مدل Order
-            # چون مدل را در مرحله قبل اصلاح کردیم، حالا این خط خطا نمی‌دهد
             order = form.save()
-
-            # ۲. انتقال آیتم‌ها از سبد خرید به OrderItem
-            # دقت کن: در فایل اول دیدم که از cart.items.items() استفاده کردی
-            # پس باید مطابق همان ساختار بنویسیم
-            for product, quantity in cart.items.items():
+            items_to_process = cart.items
+            for item in items_to_process:
                 OrderItem.objects.create(
                     order=order,
-                    product=product,
-                    price=product.price,  # ذخیره قیمت محصول در لحظه خرید
-                    quantity=quantity
+                    product=item['product'],
+                    price_at_purchase=item['price'],
+                    quantity=item['quantity']
                 )
-                # ۳. کاهش موجودی انبار
-                product.stock -= quantity
+                product = item['product']
+                product.stock -= item['quantity']
                 product.save()
 
-            # ۴. خالی کردن سبد خرید
-            cart.clear()
-
-            # ۵. هدایت به صفحه موفقیت
-            return render(request, 'shop/orders/created.html', {'order': order})
+            cart.clear() 
+            request.session.save()
+            return redirect('shop:order_create')
     else:
         form = OrderCreateForm()
     

@@ -72,6 +72,8 @@ class Cart:
         return total
 
     def clear(self):
-        if 'cart' in self.session:
-            del self.session['cart']
+        self.cart = {}
+        self.session['cart'] = self.cart
         self.save()
+
+    

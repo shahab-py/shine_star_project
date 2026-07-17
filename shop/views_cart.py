@@ -1,6 +1,4 @@
-from django.shortcuts import render, redirect
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseRedirect
 from .cart import Cart
 from .models import Product
 
