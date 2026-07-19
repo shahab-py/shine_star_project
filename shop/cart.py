@@ -4,10 +4,7 @@ from .models import Product
 class Cart:
     def __init__(self, request):
         self.session = request.session
-        cart = self.session.get('cart')
-        if not cart:
-            cart = self.session['cart'] = {}
-        self.cart = cart
+        self.cart = dict(self.session.get('cart', {}))
 
     @property
     def items(self):
@@ -15,7 +12,7 @@ class Cart:
 
     def add(self, product, quantity=None, override_quantity=None):
         product_id = str(product.id)
-        
+
         if product_id not in self.cart:
             self.cart[product_id] = {
                 'quantity': 0, 
@@ -30,6 +27,8 @@ class Cart:
         self.save()
 
     def save(self):
+        # ذخیره کردن در سشن
+        self.session['cart'] = self.cart
         self.session.modified = True
 
     def remove(self, product):
@@ -72,8 +71,7 @@ class Cart:
         return total
 
     def clear(self):
+        if 'cart' in self.session:
+            del self.session['cart']
         self.cart = {}
-        self.session['cart'] = self.cart
-        self.save()
-
-    
+        self.session.modified = True
