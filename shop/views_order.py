@@ -3,6 +3,12 @@ from django.urls import reverse_lazy
 from .forms import OrderCreateForm
 from .models import Order, OrderItem
 from .cart import Cart
+from django.shortcuts import render
+from django.db import transaction
+from django.core.exceptions import ValidationError
+
+
+
 
 class OrderCreateView(FormView):
     template_name = 'shop/orders/create.html'
@@ -11,50 +17,40 @@ class OrderCreateView(FormView):
 
     def form_valid(self, form):
         cart = Cart(self.request)
-    
-        if not cart:
+        
+        try:
+            with transaction.atomic():
+                order = form.save()
+
+                for item in cart:
+                    product = item['product']
+                    quantity_to_buy = item['quantity']
+
+                    if product.stock < quantity_to_buy:
+                        raise ValidationError(f"متاسفانه موجودی محصول '{product.name}' کافی نیست.")
+
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        price_at_purchase=item['price'],
+                        quantity=quantity_to_buy
+                    )
+                    
+                    product.stock -= quantity_to_buy
+                    product.save()
+
+                cart.clear() 
+
             return super().form_valid(form)
 
-   
-        order = Order.objects.create(
-            first_name=form.cleaned_data['first_name'],
-            last_name=form.cleaned_data['last_name'],
-            email=form.cleaned_data['email'],
-            address=form.cleaned_data['address'],
-            city=form.cleaned_data['city'],
-            postcode=form.cleaned_data['postcode'],
-            phone_number=form.cleaned_data['phone_number'],
-        )
-
-
-
-  
-        
-
-        return super().form_valid(form)
+        except ValidationError as e:
+            form.add_error(None, e.message)
+            return self.form_invalid(form)
+        except Exception as e:
+            # برای خطاهای دیگر
+            form.add_error(None, f"خطایی در ثبت سفارش رخ داد: {str(e)}")
+            return self.form_invalid(form)
     
-        for item in cart:
-            order_item = OrderItem.objects.create(
-                order=order,
-                product=item['product'],
-                price=item['price'],
-                quantity=item['quantity']
-            )
-  
-            item['product'].stock -= item['quantity']
-            item['product'].save()
-
-            cart.clear()
-
-
-from django.views.generic import TemplateView
-
-class OrderSuccessView(TemplateView):
-    template_name = 'shop/orders/created.html'
-
-
-
-from django.shortcuts import render
 
 def order_success(request):
     return render(request, 'shop/order_success.html')

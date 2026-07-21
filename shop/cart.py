@@ -27,7 +27,6 @@ class Cart:
         self.save()
 
     def save(self):
-        # ذخیره کردن در سشن
         self.session['cart'] = self.cart
         self.session.modified = True
 
@@ -62,16 +61,35 @@ class Cart:
     def __len__(self):
         return sum(item['quantity'] for item in self.cart.values())
 
-    def get_total_price(self):
-        total = Decimal(0)
-        for item in self.cart.values():
-            price = Decimal(item.get('price', 0))
-            quantity = item.get('quantity', 0)
-            total += price * quantity
-        return total
-
     def clear(self):
         if 'cart' in self.session:
             del self.session['cart']
         self.cart = {}
         self.session.modified = True
+
+    def add(self, product, quantity=None, override_quantity=None):
+        product_id = str(product.id)
+
+        if product_id not in self.cart:
+            self.cart[product_id] = {
+                'quantity': 0, 
+                'price': str(product.price)
+            }
+        
+        if override_quantity is not None:
+            self.cart[product_id]['quantity'] = override_quantity
+        else:
+            self.cart[product_id]['quantity'] += quantity or 1
+        
+        self.save()
+
+    def get_total_items(self):
+        return sum(int(item['quantity']) for item in self.cart.values())
+
+    def get_total_price(self):
+        total = Decimal('0.00')
+        for item in self.cart.values():
+            price = Decimal(item.get('price', '0'))
+            quantity = int(item.get('quantity', 0))
+            total += price * quantity
+        return total

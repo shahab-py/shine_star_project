@@ -27,8 +27,13 @@ class Product(models.Model):
         verbose_name = "محصول"
         verbose_name_plural = "محصولات"
 
+    @property
+    def is_in_stock(self):
+        return self.stock > 0
+    
     def __str__(self):
         return self.name
+    
 
 
 class Order(models.Model):

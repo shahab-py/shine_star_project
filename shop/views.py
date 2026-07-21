@@ -72,7 +72,8 @@ def order_create(request):
 
             request.session.create() 
             
-
+            if 'cart' in request.session:
+                del request.session['cart']
             if request.session.session_key:
                 with connection.cursor() as cursor:
                     cursor.execute(
