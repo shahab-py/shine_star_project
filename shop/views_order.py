@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 class OrderCreateView(FormView):
     template_name = 'shop/orders/create.html'
     form_class = OrderCreateForm
-    success_url = reverse_lazy('order_success')
+    success_url = reverse_lazy('shop:order_success')
 
     def form_valid(self, form):
         cart = Cart(self.request)

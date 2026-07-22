@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block extra_css %}
+
+<style>
+    .checkout-container { margin-top: 50px; margin-bottom: 50px; }
+    .card { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .product-item { padding: 15px 0; border-bottom: 1px solid #eee; }
+    .product-item:last-child { border-bottom: none; }
+    .total-section { background-color: #fdfdfd; border-radius: 10px; padding: 20px; }
+    .btn-checkout { padding: 12px 30px; font-size: 1.1rem; border-radius: 10px; font-weight: bold; }
+    .price-tag { color: #2c3e50; font-weight: 700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container checkout-container">
+    <div class="row">
+
+        <div class="col-lg-8 mb-4">
+            <div class="card p-4">
+                <h4 class="mb-4">📦 خلاصه سفارش شما</h4>
+                
+                {% for item in cart %}
+                <div class="product-item d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="rounded" style="width: 70px; height: 70px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">No Img</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-0">{{ item.product.name }}</h6>
+                        <small class="text-muted">تعداد: {{ item.quantity }}</small>
+                    </div>
+                    
+                    <div class="text-end">
+                        <span class="price-tag">{{ item.total_price|floatformat:0|intcomma }} تومان</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5">
+                    <p class="text-muted">سبد خرید شما خالی است.</p>
+                    <a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-primary">بازگشت به خرید</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+        <div class="col-lg-4">
+            <div class="card p-4">
+                <h4 class="mb-4">💰 اطلاعات پرداخت</h4>
+                <div class="total-section">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>جمع محصولات:</span>
+                        <span>{{ cart.get_total_price|floatformat:0|intcomma }} تومان</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>هزینه ارسال:</span>
+                        <span class="text-success">رایگان</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="h5">مبلغ قابل پرداخت:</span>
+                        <span class="h5 text-primary">{{ cart.get_total_price|floatformat:0|intcomma }} تومان</span>
+                    </div>
+                </div>
+
+                <form method="POST" class="mt-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">روش پرداخت</label>
+                        <select class="form-select" name="payment_method" required>
+                            <option value="online">درگاه پرداخت آنلاین (Zarinpal)</option>
+                            <option value="cod">پرداخت در محل (به زودی)</option>
+                        </select>
+                    </div>
+                    
+                    <a href="{% url 'shop:order_create' %}" class="btn btn-success w-100 btn-checkout shadow-sm">
+                        تایید نهایی و پرداخت
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    console.log("Checkout page loaded");
+</script>
+{% endblock %}

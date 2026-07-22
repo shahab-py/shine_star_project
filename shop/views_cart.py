@@ -10,7 +10,7 @@ def cart_add(request, product_id):
     cart.add(product=product, quantity=1)
     
 
-    return redirect('cart_detail')
+    return redirect('shop:cart_detail')
 
 def cart_detail(request):
     cart = Cart(request)
@@ -21,7 +21,7 @@ def cart_remove(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
     cart.remove(product)
-    return redirect('cart_detail')
+    return redirect('shop:cart_detail')
 
 
 # shop/views_cart.py
@@ -45,11 +45,29 @@ def cart_update(request, product_id):
         else:
             cart.remove(product)
 
-    return redirect('cart_detail')
+
+    return redirect('shop:cart_detail') 
 
 
 def checkout_view(request):
-    #return HttpResponse(".این صفحه در حال ساخت است")
-    return redirect('order_create')
+    cart = Cart(request)
+
+    is_valid, error_message = cart.validate_stock()
+    
+    if not is_valid:
+        messages.error(request, error_message)
+        return redirect('shop:cart_detail')
+
+    if request.method == 'POST':
+        pass
+
+    context = {
+        'cart': cart,
+        'total_price': cart.get_total_price(),
+    }
+    
+    return render(request, 'shop/checkout.html', context)
+
+
 
 

@@ -93,3 +93,21 @@ class Cart:
             quantity = int(item.get('quantity', 0))
             total += price * quantity
         return total
+
+
+    def validate_stock(self):
+
+        for item_data in self: # از __iter__ خودتان استفاده می‌کند
+            product = item_data['product']
+            requested_quantity = item_data['quantity']
+            
+            # بررسی وضعیت فروش
+            if not product.is_available:
+                return False, f"محصول '{product.name}' در حال حاضر قابل فروش نیست."
+            
+            # بررسی موجودی انبار
+            if product.stock < requested_quantity:
+                return False, f"موجودی '{product.name}' کافی نیست. فقط {product.stock} عدد از این محصول باقی مانده است."
+                
+        return True, None
+

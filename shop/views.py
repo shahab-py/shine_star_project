@@ -5,7 +5,7 @@ from .models import Product
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from .cart import Cart
-from django.db import connection
+from django.db import transaction
 
 def product_list(request):
     products = Product.objects.filter(is_available = True)
@@ -28,7 +28,7 @@ def cart_add(request, product_id):
     cart.add(product=product, quantity=1)
     
 
-    return redirect('cart_detail')
+    return redirect('shop:cart_detail')
 
 def cart_detail(request):
     cart = Cart(request)
@@ -39,50 +39,44 @@ def cart_remove(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
     cart.remove(product)
-    return redirect('cart_detail')
+    return redirect('shop:cart_detail')
 
+
+from django.db import transaction
 
 def order_create(request):
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
         if form.is_valid():
-            cart = Cart(request)
-            
-            items_to_process = []
-            for item in cart.items.values():
-                items_to_process.append({
-                    'product': item['product'],
-                    'price': item['price'],
-                    'quantity': item['quantity']
-                })
-            order = form.save()
+            try:
+                with transaction.atomic():
+                    cart = Cart(request)
+                    
+                    order = form.save()
 
-            for item in items_to_process:
-                OrderItem.objects.create(
-                    order=order,
-                    product=item['product'],
-                    price_at_purchase=item['price'],
-                    quantity=item['quantity']
-                )
-                product = item['product']
-                product.stock -= item['quantity']
-                product.save()
-            request.session.flush()
-            print(f"DEBUG: Session flushed. Current session keys: {request.session.keys()}")
+                    for item in cart.items.values():
+                        product = item['product']
+                        quantity = item['quantity']
+                        price = item['price']
 
-            request.session.create() 
-            
-            if 'cart' in request.session:
-                del request.session['cart']
-            if request.session.session_key:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "DELETE FROM django_session WHERE session_key = %s", 
-                        [request.session.session_key]
-                    )
+                        OrderItem.objects.create(
+                            order=order,
+                            product=product,
+                            price_at_purchase=price,
+                            quantity=quantity
+                        )
+                        
+                        product.stock -= quantity
+                        product.save()
 
+                    if 'cart' in request.session:
+                        del request.session['cart']
+                    
 
-            return redirect('shop:order_complete')
+                return redirect('shop:order_complete')
+                
+            except Exception as e:
+                print(f"ERROR during order creation: {e}")
     else:
         form = OrderCreateForm()
     
