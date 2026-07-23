@@ -193,7 +193,15 @@
                         <span class="h5 fw-bold mb-0" style="color: var(--shine-primary);">
                             {{ product.price|floatformat:0|intcomma }} <small class="fs-6 text-muted">تومان</small>
                         </span>
-                        <a href="{% url 'shop:cart_add' product.id %}" class="btn btn-add-to-cart w-100 py-2">
+                        {% if product.stock > 0 %}
+                            <a href="{% url 'shop:cart_add' product.id %}" class="btn btn-primary">
+                                افزودن به سبد خرید
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary" disabled title="محصول ناموجود است">
+                                ناموجود
+                            </button>
+                        {% endif %}
                             <i class="bi bi-bag-plus me-2"></i> افزودن به سبد خرید
                         </a>
                     </div>

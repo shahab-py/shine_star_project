@@ -1,5 +1,4 @@
-{% extends 'base.html' %} <!-- اگر فایل base.html داری -->
-
+{% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -7,6 +6,21 @@
             <div class="card shadow">
                 <div class="card-body">
                     <h2 class="text-success mb-4">🎉 سفارش با موفقیت ثبت شد!</h2>
+                    <h1>سفارش شما با موفقیت ثبت شد!</h1>
+                    <div>
+                        <p>شماره سفارش شما: {{ order.id }}</p>
+
+                        <h3>جزئیات سفارش:</h3>
+                        {% for item in order.items.all %}
+                            <p>{{ item.product.name }} - {{ item.quantity }} عدد - {{ item.price_at_purchase }} تومان</p>
+
+                        {% endfor %}
+                            {% if order %}
+                                <p>جمع کل سفارش: {{ order.total_price }} تومان</p>
+                            {% else %}
+                                <p>سفارشی یافت نشد.</p>
+                            {% endif %}
+                    </div>   
                     <p class="lead">ممنون از اینکه از Shine Star خرید کردید. سفارش شما در حال پردازش است.</p>
                     <hr>
                     <a href="{% url 'shop:home' %}" class="btn btn-primary">بازگشت به صفحه اصلی</a>

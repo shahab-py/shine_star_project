@@ -7,6 +7,7 @@ from shop.models import Product
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from shop.cart import Cart
+from .models import Order
 from django.db import transaction
 
 
@@ -49,3 +50,4 @@ def order_create(request):
     
     cart = Cart(request)
     return render(request, 'shop/orders/create.html', {'cart': cart, 'form': form})
+
