@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Shine Star | دنیای زیبایی و درخشش{% endblock %}
+
+
+{% block content %}
+<style>
+    /* تعریف متغیرهای رنگی برای تم لوازم آرایشی (Rose Gold & Soft Nude) */
+    :root {
+        --shine-primary: #d4a373; /* رنگ طلایی ملایم / Rose Gold */
+        --shine-secondary: #faedcd; /* رنگ کرم روشن */
+        --shine-accent: #e9edc9; /* رنگ سبز خیلی ملایم برای تضاد */
+        --shine-text: #4a4a4a;
+        --shine-pink: #fceef5; /* صورتی بسیار ملایم برای پس‌زمینه‌ها */
+    }
+
+    body {
+        background-color: #fffafb; /* پس‌زمینه بسیار ملایم صورتی/سفید */
+        color: var(--shine-text);
+        font-family: 'Vazirmatn', sans-serif; /* فرض بر اینکه فونت فارسی دارید */
+    }
+
+    /* ۱. استایل Hero Section مدرن و لوکس */
+    .hero-section {
+        position: relative;
+        overflow: hidden;
+        border-radius: 30px; /* لبه‌های بسیار گرد برای حس نرمی */
+        margin: 20px;
+        height: 550px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(to left, rgba(0,0,0,0.7), rgba(0,0,0,0.2));
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: right; /* برای سایت فارسی */
+    }
+
+    .hero-title {
+        font-size: 4rem;
+        letter-spacing: -1px;
+        text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .btn-shine {
+        background-color: var(--shine-primary);
+        color: white;
+        border: none;
+        padding: 12px 40px;
+        border-radius: 50px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(212, 163, 115, 0.3);
+    }
+
+    .btn-shine:hover {
+        background-color: #bc8a5f;
+        transform: translateY(-3px);
+        color: white;
+    }
+
+    /* ۲. استایل کارت محصولات (Product Cards) */
+    .product-card {
+        border: none !important;
+        border-radius: 20px !important;
+        background: #ffffff;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 50px rgba(212, 163, 115, 0.15) !important;
+    }
+
+    .img-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .product-img {
+        transition: transform 0.6s ease;
+        height: 300px;
+        object-fit: cover;
+    }
+
+    .product-card:hover .product-img {
+        transform: scale(1.1);
+    }
+
+    /* دکمه افزودن به سبد خرید که روی تصویر یا زیر آن ظاهر می‌شود */
+    .btn-add-to-cart {
+        border-radius: 50px;
+        border: 1px solid var(--shine-primary);
+        color: var(--shine-primary);
+        background: transparent;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+
+    .btn-add-to-cart:hover {
+        background: var(--shine-primary);
+        color: white;
+    }
+
+    /* ۳. بخش عنوان‌ها */
+    .section-title {
+        position: relative;
+        display: inline-block;
+        padding-bottom: 15px;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--shine-primary);
+        border-radius: 10px;
+    }
+
+    /* انیمیشن ورود */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+</style>
+
+<!-- ۱. بخش Hero (بنر اصلی با استایل لوکس) -->
+<section class="hero-section text-white mb-5">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content fade-in">
+        <div class="row">
+            <div class="col-lg-6">
+                <h1 class="hero-title fw-bold mb-3">درخششی که <br><span style="color: var(--shine-primary);">شایسته شماست</span></h1>
+                <p class="lead mb-5 opacity-75">تجربه‌ای متفاوت از زیبایی با بهترین محصولات آرایشی و مراقبتی در Shine Star.</p>
+                <a href="#products" class="btn btn-shine btn-lg shadow">شروع تجربه زیبایی</a>
+            </div>
+        </div>
+    </div>
+    <!-- پس‌زمینه بنر -->
+    <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1350&q=80" 
+         style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0;" 
+         alt="Hero Background">
+</section>
+
+<!-- ۲. بخش محصولات -->
+<div id="products" class="container py-4">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <h2 class="fw-bold section-title">جدیدترین کلکسیون‌ها</h2>
+            <p class="text-muted mt-2">منتخب شده توسط متخصصین زیبایی</p>
+        </div>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary rounded-pill px-4">مشاهده همه محصولات</a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-5">
+        {% for product in products %}
+        <div class="col fade-in">
+            <div class="card h-100 product-card shadow-sm">
+                <div class="img-container">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="product-img w-100" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/500x500?text=No+Image" class="product-img w-100" alt="No Image">
+                    {% endif %}
+                </div>
+                
+                <div class="card-body p-4 text-center">
+                    <h5 class="card-title fw-bold mb-2" style="color: var(--shine-text);">{{ product.name }}</h5>
+                    <p class="text-muted small mb-3" style="font-size: 0.85rem; height: 40px; overflow: hidden;">
+                        {{ product.description|truncatewords:10 }}
+                    </p>
+                    
+                    <div class="d-flex flex-column align-items-center gap-3">
+                        <span class="h5 fw-bold mb-0" style="color: var(--shine-primary);">
+                            {{ product.price|floatformat:0|intcomma }} <small class="fs-6 text-muted">تومان</small>
+                        </span>
+                        <a href="{% url 'shop:cart_add' product.id %}" class="btn btn-add-to-cart w-100 py-2">
+                            <i class="bi bi-bag-plus me-2"></i> افزودن به سبد خرید
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 120px; opacity: 0.5;">
+            <p class="text-muted mt-3 h4">هنوز محصولی در کلکسیون ما نیست.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,12 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Product, Order, OrderItem
-
-class OrderItemInline(admin.TabularInline):
-    model = OrderItem
-    raw_id_fields = ['product']
-    extra = 0
-    readonly_fields = ['price_at_purchase']
+from .models import Category, Product
+from orders.models import Order, OrderItem
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -36,25 +31,3 @@ class ProductAdmin(admin.ModelAdmin):
         text = 'موجود' if obj.stock > 0 else 'ناموجود'
         return format_html('<b style="color: {};">{}</b>', color, text)
     status_tag.short_description = 'وضعیت انبار'
-
-
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-
-    list_display = ['id', 'get_full_name', 'phone_number', 'paid', 'display_paid_status', 'created']
-    list_filter = ['paid', 'created', 'city', 'province']
-    list_editable = ['paid']
-    search_fields = ['first_name', 'last_name', 'phone_number']
-    inlines = [OrderItemInline]
-    ordering = ['-created']
-    list_per_page = 20
-
-    def get_full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
-    get_full_name.short_description = 'نام و نام خانوادگی'
-
-    def display_paid_status(self, obj):
-        color = 'green' if obj.paid else 'red'
-        text = '✅ پرداخت شده' if obj.paid else '❌ پرداخت نشده'
-        return format_html('<span style="color: {};">{}</span>', color, text)
-    display_paid_status.short_description = 'وضعیت (رنگی)'

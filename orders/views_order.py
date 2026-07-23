@@ -2,7 +2,7 @@ from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
 from .forms import OrderCreateForm
 from .models import Order, OrderItem
-from .cart import Cart
+from shop.cart import Cart
 from django.shortcuts import render
 from django.db import transaction
 from django.core.exceptions import ValidationError
@@ -11,9 +11,9 @@ from django.core.exceptions import ValidationError
 
 
 class OrderCreateView(FormView):
-    template_name = 'shop/orders/create.html'
+    template_name = 'orders/orders/create.html'
     form_class = OrderCreateForm
-    success_url = reverse_lazy('shop:order_success')
+    success_url = reverse_lazy('orders:order_success')
 
     def form_valid(self, form):
         cart = Cart(self.request)
@@ -53,4 +53,4 @@ class OrderCreateView(FormView):
     
 
 def order_success(request):
-    return render(request, 'shop/order_success.html')
+    return render(request, 'orders/order_success.html')
