@@ -145,7 +145,7 @@
 </head>
 <body>
 
-
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{% url 'shop:home' %}">
@@ -158,13 +158,16 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'shop:home' %}active{% endif %}" href="{% url 'shop:home' %}">خانه</a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'shop:product_list' %}">محصولات</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'shop:home' %}active{% endif %}" href="{% url 'shop:home' %}">خانه</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'shop:product_list' %}">محصولات</a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="#">درباره ما</a></li>
                 </ul>
 
                 <ul class="navbar-nav ms-auto align-items-center">
-  
                     <li class="nav-item me-2">
                         <a class="nav-link" href="#"><i class="bi bi-search"></i></a>
                     </li>
@@ -186,33 +189,46 @@
         </div>
     </nav>
 
+    <!-- Messages Section (Moved from Footer to here for better visibility) -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 
+    <!-- Main Content -->
     <main class="fade-up">
         {% block content %}
         {% endblock %}
     </main>
 
-
-    <footer>
+    <!-- Footer -->
+    <footer class="py-5 mt-5">
         <div class="container">
             <div class="row g-4">
               
+                <!-- About Section -->
                 <div class="col-lg-4 col-md-6">
                     <h5 class="footer-title">Shine Star</h5>
                     <p class="text-muted small">
                         ما در Shine Star معتقدیم که زیبایی، بازتاب درخشش درونی شماست. با بهترین محصولات آرایشی، خود را زیباتر از همیشه کنید.
                     </p>
                     <div class="social-icons mt-3">
-                        <a href="https:instagram/@shine_staarrr"><i class="bi bi-instagram"></i></a>
+                        <a href="https://instagram.com/@shine_staarrr"><i class="bi bi-instagram"></i></a>
                         <a href="#"><i class="bi bi-telegram"></i></a>
                         <a href="#"><i class="bi bi-whatsapp"></i></a>
                     </div>
                 </div>
 
-
+                <!-- Quick Links -->
                 <div class="col-lg-2 col-md-6">
                     <h5 class="footer-title">دسترسی سریع</h5>
-                    <ul class="footer-links">
+                    <ul class="footer-links list-unstyled">
                         <li><a href="{% url 'shop:home' %}">صفحه اصلی</a></li>
                         <li><a href="{% url 'shop:product_list' %}">همه محصولات</a></li>
                         <li><a href="#">جدیدترین‌ها</a></li>
@@ -220,9 +236,10 @@
                     </ul>
                 </div>
 
+                <!-- Support -->
                 <div class="col-lg-2 col-md-6">
                     <h5 class="footer-title">پشتیبانی</h5>
-                    <ul class="footer-links">
+                    <ul class="footer-links list-unstyled">
                         <li><a href="#">سوالات متداول</a></li>
                         <li><a href="#">شرایط بازگشت کالا</a></li>
                         <li><a href="#">راهنمای خرید</a></li>
@@ -230,6 +247,7 @@
                     </ul>
                 </div>
 
+                <!-- Newsletter -->
                 <div class="col-lg-4 col-md-6">
                     <h5 class="footer-title">عضو خبرنامه شوید</h5>
                     <p class="text-muted small">برای دریافت جدیدترین محصولات و تخفیف‌های ویژه، با ما در ارتباط باشید.</p>
@@ -242,9 +260,12 @@
                 </div>
             </div>
 
+            <hr class="my-4 opacity-25">
+
+            <!-- Copyright -->
             <div class="row copyright text-center">
                 <div class="col-12">
-                    <p>@shine_star - طراحی شده با ❤️ برای درخشش شما</p>
+                    <p class="text-muted small">@shine_star - طراحی شده با ❤️ برای درخشش شما</p>
                 </div>
             </div>
         </div>
@@ -253,4 +274,5 @@
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

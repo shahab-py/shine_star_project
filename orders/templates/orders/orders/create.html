@@ -14,8 +14,7 @@
                     
                     <form method="post" novalidate>
                         {% csrf_token %}
-                        
-                        {# نمایش خطاهای کلی فرم اگر وجود داشته باشد #}
+
                         {% if form.non_field_errors %}
                             <div class="alert alert-danger">
                                 {% for error in form.non_field_errors %}
@@ -28,10 +27,8 @@
                             <div class="mb-3">
                                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
                                 
-                                {# رندر کردن خود فیلد #}
                                 {{ field }}
 
-                                {# نمایش خطای مربوط به همان فیلد در صورت وجود #}
                                 {% if field.errors %}
                                     <div class="text-danger small mt-1">
                                         {% for error in field.errors %}
@@ -40,7 +37,6 @@
                                     </div>
                                 {% endif %}
 
-                                {# نمایش راهنمای فیلد (Help Text) اگر در forms.py تعریف کرده باشی #}
                                 {% if field.help_text %}
                                     <div class="form-text">{{ field.help_text }}</div>
                                 {% endif %}
@@ -59,7 +55,6 @@
 </div>
 
 <style>
-    /* یک استایل سریع برای اینکه فیلدهای جنگو شبیه بوت‌استرپ شوند */
     input, textarea {
         display: block;
         width: 100%;

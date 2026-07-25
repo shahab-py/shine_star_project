@@ -7,7 +7,7 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
     raw_id_fields = ['product']
     extra = 0
-    readonly_fields = ['price_at_purchase']
+    readonly_fields = ('price_at_purchase', 'quantity')
 
 
 @admin.register(Order)
@@ -30,3 +30,6 @@ class OrderAdmin(admin.ModelAdmin):
         text = '✅ پرداخت شده' if obj.paid else '❌ پرداخت نشده'
         return format_html('<span style="color: {};">{}</span>', color, text)
     display_paid_status.short_description = 'وضعیت (رنگی)'
+
+
+

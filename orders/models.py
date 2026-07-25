@@ -5,6 +5,16 @@ from django.conf import settings
 
 
 class Order(models.Model):
+
+    STATUS_CHOICES = [
+        ('pending', 'در انتظار پرداخت'),
+        ('paid', 'پرداخت شده'),
+        ('processing', 'در حال آماده‌سازی'),
+        ('shipped', 'ارسال شده'),
+        ('delivered', 'تحویل شده'),
+        ('cancelled', 'لغو شده'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', on_delete=models.CASCADE, null=True, blank=True)
     first_name = models.CharField(max_length=50, verbose_name="نام")
     last_name = models.CharField(max_length=50, verbose_name="نام خانوادگی")
@@ -28,6 +38,15 @@ class Order(models.Model):
     @property
     def get_total_cost(self):
         return sum(item.price_at_purchase * item.quantity for item in self.items.all())
+
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='pending'
+    )
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.get_status_display()}"
 
 
 class OrderItem(models.Model):
