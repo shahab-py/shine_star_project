@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load humanize %} 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6 text-center">
@@ -11,12 +12,15 @@
                         <p>شماره سفارش شما: {{ order.id }}</p>
 
                         <h3>جزئیات سفارش:</h3>
-                        {% for item in order.items.all %}
-                            <p>{{ item.product.name }} - {{ item.quantity }} عدد - {{ item.price_at_purchase }} تومان</p>
-
-                        {% endfor %}
+                            {% for item in order.items.all %}
+                                <p>
+                                    {{ item.product.name }} - 
+                                    تعداد: {{ item.quantity }} - 
+                                    {% widthratio item.price_at_purchase 1 item.quantity %} تومان
+                                </p>
+                            {% endfor %}
                             {% if order %}
-                                <p>جمع کل سفارش: {{ order.total_price }} تومان</p>
+                                <p>جمع کل سفارش: {{ order.total_price|floatformat:0|intcomma }} تومان</p>
                             {% else %}
                                 <p>سفارشی یافت نشد.</p>
                             {% endif %}
