@@ -12,19 +12,30 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 
 import os
-import environ
 from pathlib import Path
+import environ
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env()
 
+
+env = environ.Env(
+    DEBUG=(bool, False) 
+)
 
 env_file = os.path.join(BASE_DIR, '.env')
 if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 
+
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG', cast=bool)
+
+
+ZARINPAL_START_URL = env('ZARINPAL_API_URL').strip()
+MERCHANT_ID = env('ZARINPAL_MERCHANT_ID').strip()
+ZARINPAL_MERCHANT_ID = env('ZARINPAL_MERCHANT_ID', default='')
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True

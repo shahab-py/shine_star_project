@@ -1,5 +1,6 @@
 # orders/views_order.py
 
+from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
 from django.urls import reverse_lazy
 from .forms import OrderCreateForm
@@ -8,12 +9,13 @@ from shop.cart import Cart
 from django.shortcuts import render, get_object_or_404
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse 
+
 
 class OrderCreateView(FormView):
     template_name = 'orders/orders/create.html'
     form_class = OrderCreateForm
-    success_url = reverse_lazy('orders:order_success')
+
+    # success_url = reverse_lazy('orders:order_success')
 
     def form_valid(self, form):
         cart = Cart(self.request)
@@ -50,19 +52,19 @@ class OrderCreateView(FormView):
                 order.save()
                 print(f"DEBUG: Final Total Price saved to Order: {total_order_price}")
 
-                cart.clear() 
+                #cart.clear() 
                 self.request.session['order_id'] = order.id
 
-            return super().form_valid(form) 
+            return redirect('orders:payment_start', order_id=order.id)
+            # -------------------------------------------------------
 
         except ValidationError as e:
             form.add_error(None, e.message)
             return self.render_to_response(self.get_context_data(form=form))
 
         except Exception as e:
+            print(f"CRITICAL ERROR: {e}") # چاپ خطا در ترمینال برای دیباگ
             form.add_error(None, f"خطایی در ثبت سفارش رخ داد: {str(e)}")
-            # response = self.form_invalid(form)
-            # return response
             return self.render_to_response(self.get_context_data(form=form))
 
 
