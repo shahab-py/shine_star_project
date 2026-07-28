@@ -17,6 +17,7 @@ import environ
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+AUTH_USER_MODEL = 'accounts.User'
 
 
 env = environ.Env(
@@ -61,6 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'shop',
     'orders',
+    'accounts'
 ]
 
 MIDDLEWARE = [
