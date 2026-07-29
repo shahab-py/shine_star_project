@@ -70,21 +70,21 @@
                         {% csrf_token %}
 
                         <!-- فیلد نام کاربری -->
-                        <div class="form-floating">
-                            <input type="text" name="username" class="form-control" id="username" placeholder="نام کاربری" required>
-                                <label for="username" style="color: rgba(0,0,0,0.3);">نام کاربری</label>
+                        <div class="form-floating"> 
+                            <input type="text" name="username" class="form-control" id="username"  required>
+                                <label for="username" style="color: rgba(0,0,0,0.4);">نام کاربری</label>   
                         </div>
 
                         <!-- فیلد ایمیل -->
                         <div class="form-floating">
-                            <input type="email" name="email" class="form-control" id="email" placeholder="ایمیل" required>
-                            <label for="email" style="color: rgba(0,0,0,0.3);">ایمیل</label>
+                            <input type="email" name="email" class="form-control" id="email" required>
+                            <label for="email" style="color: rgba(0,0,0,0.4);">ایمیل</label>
                         </div>
 
                         <!-- فیلد پسورد -->
                         <div class="form-floating input-group">
-                            <input type="password" name="password" class="form-control" id="password" placeholder="رمز عبور" required>
-                            <label for="password" style="color: rgba(0,0,0,0.3);">رمز عبور</label>
+                            <input type="password" name="password" class="form-control" id="password" required>
+                            <label for="password" style="color: rgba(0,0,0,0.4);">رمز عبور</label>
                             <span class="input-group-text bg-transparent border-0" onclick="togglePassword('password')">
                                 <i class="bi bi-eye password-toggle-icon" id="eye-icon-password"></i>
                             </span>
@@ -92,8 +92,8 @@
 
                         <!-- فیلد تایید پسورد -->
                         <div class="form-floating input-group">
-                            <input type="password" name="confirm_password" class="form-control" id="confirm_password" placeholder="تکرار رمز عبور" required>
-                            <label for="confirm_password" style="color: rgba(0,0,0,0.3);">تکرار رمز عبور</label>
+                            <input type="password" name="confirm_password" class="form-control" id="confirm_password" required>
+                            <label for="confirm_password" style="color: rgba(0,0,0,0.4);">تکرار رمز عبور</label>
                             <span class="input-group-text bg-transparent border-0" onclick="togglePassword('confirm_password')">
                                 <i class="bi bi-eye password-toggle-icon" id="eye-icon-confirm_password"></i>
                             </span>

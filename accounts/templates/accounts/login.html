@@ -1,38 +1,71 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-5">
+<style>
+    /* بهبود استایل فیلدها برای ظاهر مدرن‌تر */
+    .form-control {
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+    /* جلوگیری از تیره شدن بیش از حد متون کمکی */
+    .text-label {
+        color: #495057;
+        font-size: 0.85rem;
+    }
+    .text-helper {
+        color: #6c757d;
+        font-size: 0.75rem;
+    }
+    /* استایل کارت */
+    .login-card {
+        border: none;
+        border-radius: 20px;
+    }
+</style>
+
+<div class="container py-5" dir="rtl">
     <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-            <div class="card border-0 shadow-lg rounded-4">
-                <div class="card-body p-5">
+        <div class="col-md-6 col-lg-4">
+            <div class="card login-card shadow-lg">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <!-- هدر صفحه -->
                     <div class="text-center mb-4">
-                        <h3 class="fw-bold">ورود به حساب کاربری</h3>
-                        <p class="text-muted small">لطفاً اطلاعات خود را وارد کنید</p>
+                        <h3 class="fw-bold text-dark">ورود به حساب</h3>
+                        <p class="text-helper mb-0">خوش آمدید! لطفاً اطلاعات خود را وارد کنید</p>
                     </div>
 
                     <form method="post" novalidate>
                         {% csrf_token %}
 
                         <!-- فیلد نام کاربری -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small">نام کاربری یا ایمیل</label>
-                            <input type="text" name="username" class="form-control form-control-lg" 
-                                   placeholder="نام کاربری خود را وارد کنید" required>
+                        <div class="mb-3 text-end">
+                            <label class="form-label text-label fw-semibold mb-1">نام کاربری یا ایمیل</label>
+                            <input type="text" name="username" 
+                                   class="form-control form-control-lg fs-6" 
+                                   
                             {% if form.username.errors %}
                                 <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
                             {% endif %}
                         </div>
 
-                        <!-- فیلد رمز عبور با آیکون چشم -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold small">رمز عبور</label>
+                        <!-- فیلد رمز عبور -->
+                        <div class="mb-4 text-end">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label text-label fw-semibold mb-0">رمز عبور</label>
+                                <!-- لینک فراموشی رمز (اختیاری اما مفید) -->
+                                <a href="#" class="text-decoration-none small text-primary">فراموشی رمز؟</a>
+                            </div>
                             <div class="input-group">
                                 <input type="password" name="password" id="id_password" 
-                                       class="form-control form-control-lg" 
-                                       placeholder="رمز عبور خود را وارد کنید" required>
-                                <span class="input-group-text bg-white" id="togglePassword" style="cursor: pointer;">
-                                    <i class="bi bi-eye-slash" id="eyeIcon"></i>
+                                       class="form-control form-control-lg fs-6" 
+                                       placeholder="" required>
+                                <span class="input-group-text bg-white border-start-0" id="togglePassword" style="cursor: pointer; border-right: none;">
+                                    <i class="bi bi-eye-slash text-muted" id="eyeIcon"></i>
                                 </span>
                             </div>
                             {% if form.password.errors %}
@@ -40,23 +73,28 @@
                             {% endif %}
                         </div>
 
+                        <!-- دکمه ورود -->
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">ورود</button>
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm fw-bold">
+                                ورود به پنل
+                            </button>
                         </div>
                     </form>
 
+                    <!-- بخش ثبت‌نام -->
                     <div class="text-center mt-4">
-                        <p class="small text-muted">هنوز عضو نشده‌ای؟ 
+                        <p class="text-helper mb-0">هنوز عضو نشده‌ای؟ 
                             <a href="{% url 'register' %}" class="text-decoration-none fw-bold text-primary">ثبت‌نام کنید</a>
                         </p>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- جاوااسکریپت برای نمایش/مخفی کردن پسورد -->
+<!-- جاوااسکریپت اصلاح شده -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const togglePassword = document.querySelector('#togglePassword');
@@ -64,11 +102,10 @@
         const eyeIcon = document.querySelector('#eyeIcon');
 
         togglePassword.addEventListener('click', function () {
-            // تغییر نوع فیلد بین password و text
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
             
-            // تغییر آیکون بین چشم باز و چشم بسته
+            // تغییر آیکون با کلاس‌های Bootstrap Icons
             if (type === 'text') {
                 eyeIcon.classList.replace('bi-eye-slash', 'bi-eye');
             } else {
