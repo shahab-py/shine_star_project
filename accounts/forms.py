@@ -19,14 +19,7 @@ class UserRegistrationForm(UserCreationForm):
         fields = ('username', 'first_name', 'last_name', 'email', 'phone_number', 'bio')
     password1 = forms.CharField(label="رمز عبور", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label="تکرار رمز عبور", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-class UserProfileForm(forms.ModelForm):
-    first_name = forms.CharField(label="نام", widget=forms.TextInput(attrs={'class': 'form-control'}))
-    last_name = forms.CharField(label="نام خانوادگی", widget=forms.TextInput(attrs={'class': 'form-control'}))
-    bio = forms.CharField(label="درباره من", widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}), required=False)
 
-    class Meta:
-        model = User
-        fields = ('first_name', 'last_name', 'bio')
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -51,4 +44,29 @@ class CustomLoginForm(AuthenticationForm):
             'inactive': 'این حساب کاربری غیرفعال است.',
             'bad_credentials': 'نام کاربری یا رمز عبور اشتباه است.',
             'none': 'لطفاً نام کاربری و رمز عبور را وارد کنید.',
+        }
+
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'bio', 'birth_date', 'profile_picture']
+        labels = {
+            'first_name': 'نام',
+            'last_name': 'نام خانوادگی',
+            'email': 'ایمیل',
+            'phone_number': 'شماره موبایل',
+            'bio': 'درباره من',
+            'birth_date': 'تاریخ تولد',
+            'profile_picture': 'تصویر پروفایل',
+        }
+        
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام خود را وارد کنید'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام خانوادگی را وارد کنید'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'example@mail.com'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '۰۹۱۲XXXXXXX'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'کمی درباره خودتان بنویسید...'}),
+            'birth_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
         }

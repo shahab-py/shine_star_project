@@ -5,54 +5,43 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="card border-0 shadow rounded-4 overflow-hidden">
-                <!-- هدر پروفایل با رنگ برند -->
+                <!-- هدر فرم -->
                 <div class="card-header bg-primary py-4 text-center border-0">
-                    <div class="position-relative d-inline-block">
-                        {% if user.profile_picture %}
-                            <img src="{{ user.profile_picture.url }}" class="rounded-circle border border-4 border-white shadow" width="100" height="100" style="object-fit: cover;">
-                        {% else %}
-                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center shadow" style="width: 100px; height: 100px;">
-                                <span class="fs-1 text-primary">{{ user.username|first|upper }}</span>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <h3 class="text-white mt-3 mb-0">{{ user.get_full_name|default:user.username }}</h3>
-                    <span class="badge {% if user.is_premium %}bg-warning text-dark{% else %}bg-light text-primary{% endif %} mt-2 px-3 rounded-pill">
-                        {% if user.is_premium %}🌟 کاربر ویژه (VIP){% else %}کاربر عادی{% endif %}
-                    </span>
+                    <h3 class="text-white mb-0">ویرایش اطلاعات پروفایل</h3>
+                    <p class="text-white-50 small mt-2">تغییرات شما پس از ذخیره اعمال خواهد شد</p>
                 </div>
 
                 <div class="card-body p-4">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                            <span class="text-muted small">نام کاربری:</span>
-                            <span class="fw-bold">{{ user.username }}</span>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                            <span class="text-muted small">ایمیل:</span>
-                            <span class="fw-bold">{{ user.email }}</span>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                            <span class="text-muted small">شماره تماس:</span>
-                            <span class="fw-bold">{{ user.phone_number }}</span>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                            <span class="text-muted small">تاریخ تولد:</span>
-                            <span class="fw-bold">{{ user.birth_date|default:"ثبت نشده" }}</span>
-                        </div>
-                        <div class="list-group-item d-flex flex-column border-0 px-0">
-                            <span class="text-muted small mb-1">درباره من:</span>
-                            <p class="mb-0 text-dark">{{ user.bio|default:"متنی نوشته نشده است." }}</p>
-                        </div>
-                    </div>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
 
-                    <div class="d-grid gap-2 mt-4">
-                        <a href="{% url 'profile' %}" class="btn btn-outline-primary rounded-pill">ویرایش اطلاعات</a>
-                        <form action="{% url 'logout' %}" method="post" class="d-grid">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-light text-danger rounded-pill">خروج از حساب</button>
-                        </form>
-                    </div>
+                        <!-- فیلد غیرقابل تغییر نام کاربری -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small">نام کاربری</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                        </div>
+
+                        <hr>
+
+                        <!-- رندر خودکار فیلدهای فرم -->
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-muted small">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <!-- دکمه‌ها -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary rounded-pill py-2">ذخیره تغییرات</button>
+                            <a href="{% url 'profile' %}" class="btn btn-light text-muted rounded-pill py-2">انصراف و بازگشت</a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

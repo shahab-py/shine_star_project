@@ -175,8 +175,8 @@
                                 <i class="bi bi-person-circle"></i> {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i> پروفایل</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i> تنظیمات</a></li>
+                                <li><a class="dropdown-item" href="{% url "profile" %}"><i class="bi bi-person me-2"></i> پروفایل</a></li>
+                                <li><a class="dropdown-item" href="{% url "profile_edit" %}"><i class="bi bi-gear me-2"></i> تنظیمات</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> خروج</a></li>
                             </ul>
