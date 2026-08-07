@@ -66,13 +66,13 @@
                 <div class="card-body text-center">
                     <h3>عضویت</h3>
                     
-                    <form method="post" action="{% url 'register' %}">
+                    <form method="post" action="{% url 'accounts:register' %}">
                         {% csrf_token %}
 
                         <!-- فیلد نام کاربری -->
                         <div class="form-floating"> 
-                            <input type="text" name="username" class="form-control" id="username"  required>
-                                <label for="username" style="color: rgba(0,0,0,0.4);">نام کاربری</label>   
+                            <input type="text" name="username" class="form-control" id="username" required>
+                            <label for="username" style="color: rgba(0,0,0,0.4);">نام کاربری</label>   
                         </div>
 
                         <!-- فیلد ایمیل -->
@@ -103,7 +103,7 @@
                     </form>
 
                     <div class="mt-3">
-                        <p class="small text-muted">قبلاً عضو شده‌ای؟ <a href="{% url 'login' %}" class="text-decoration-none">وارد شوید</a></p>
+                        <p class="small text-muted">قبلاً عضو شده‌ای؟ <a href="{% url 'accounts:login' %}" class="text-decoration-none">وارد شوید</a></p>
                     </div>
                 </div>
             </div>

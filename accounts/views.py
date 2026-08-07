@@ -26,18 +26,20 @@ def register_view(request):
     return render(request, 'accounts/register.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='accounts:login')
 def profile_view(request):
     return render(request, 'accounts/profile.html')
 
-@login_required
+@login_required(login_url='accounts:login')
 def profile_edit_view(request):
     if request.method == 'POST':
-        form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
+        form = UserUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, "اطلاعات پروفایل شما با موفقیت به‌روزرسانی شد.")
-            return redirect('profile')
+            messages.success(request, 'پروفایل شما با موفقیت بروزرسانی شد.')
+            return redirect('accounts:profile')
+        else:
+            messages.error(request, 'خطا در بروزرسانی پروفایل.')
     else:
         form = UserUpdateForm(instance=request.user)
     
@@ -51,7 +53,7 @@ def custom_logout(request):
 
 class CustomPasswordChangeView(PasswordChangeView):
     template_name = 'accounts/password_change.html'
-    success_url = reverse_lazy('password_change_done')
+    success_url = reverse_lazy('accounts:password_change_done')
     
     def form_valid(self, form):
         messages.success(self.request, "رمز عبور با موفقیت تغییر کرد!")
@@ -62,14 +64,14 @@ class CustomPasswordResetView(PasswordResetView):
     template_name = 'accounts/password_reset.html'
     email_template_name = 'accounts/password_reset_email.html'
     subject_template_name = 'accounts/password_reset_subject.txt'
-    success_url = reverse_lazy('password_reset_done')
+    success_url = reverse_lazy('accounts:password_reset_done')
 
 class CustomPasswordResetDoneView(PasswordResetDoneView):
     template_name = 'accounts/password_reset_done.html'
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     template_name = 'accounts/password_reset_confirm.html'
-    success_url = reverse_lazy('password_reset_complete')
+    success_url = reverse_lazy('accounts:password_reset_complete')
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'accounts/password_reset_complete.html'

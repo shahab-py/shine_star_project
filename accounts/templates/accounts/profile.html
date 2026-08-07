@@ -47,9 +47,9 @@
                     </div>
 
                     <div class="d-grid gap-2 mt-4">
-                        <a href="{% url 'profile_edit' %}" class="btn btn-outline-primary rounded-pill">ویرایش اطلاعات</a>
-                        <form action="{% url 'logout' %}" method="post" class="d-grid">
-                        <a href="{% url 'password_change' %}" class="btn btn-outline-warning btn-sm">🔑 تغییر رمز</a>
+                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-primary rounded-pill">ویرایش اطلاعات</a>
+                        <form action="{% url 'accounts:logout' %}" method="post" class="d-grid">
+                        <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-warning btn-sm">🔑 تغییر رمز</a>
 
                             {% csrf_token %}
                             <button type="submit" class="btn btn-light text-danger rounded-pill">خروج از حساب</button>

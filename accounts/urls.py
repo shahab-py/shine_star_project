@@ -3,6 +3,9 @@ from django.contrib.auth import views as auth_views
 from . import views
 from .views import custom_logout, CustomPasswordChangeView
 
+
+app_name = 'accounts'
+
 urlpatterns = [
     # User Management & Profile
     path('register/', views.register_view, name='register'),
