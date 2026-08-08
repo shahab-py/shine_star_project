@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.core.exceptions import ValidationError
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name="نام دسته‌بندی")
@@ -34,4 +35,17 @@ class Product(models.Model):
     
     def __str__(self):
         return self.name
+
+
+    def decrease_stock(self, quantity):
+        if quantity > self.stock:
+            raise ValidationError(f"موجودی کافی برای محصول {self.name} نیست.")
+        
+        self.stock -= quantity
+        self.save()
+
+    def __str__(self):
+        return self.name
+
+    
     
