@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from .views import custom_logout, CustomPasswordChangeView
+from . import views, api_views
 
 
 app_name = 'accounts'
@@ -41,4 +42,10 @@ urlpatterns = [
     path('password-reset/complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='accounts/password_reset/password_reset_complete.html'
     ), name='password_reset_complete'),
+
+
+    # API PATH
+    path('api/profile/', api_views.UserProfileAPIView.as_view(), name='api_profile'),
+    path('api/token/', api_views.GetTokenAPIView.as_view(), name='api_token'),
+    
 ]
