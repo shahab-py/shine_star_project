@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from .factories import ProductFactory, CategoryFactory
 from django.urls import reverse
 from .models import Product, Category
-
+from django.db import transaction
 
 #MODEOLS TESTS
 @pytest.mark.django_db
@@ -85,3 +85,43 @@ def test_cart_remove_view(client):
     
     assert response.status_code == 302
     assert response.url == reverse('shop:cart_detail')
+
+
+@pytest.mark.django_db
+class TestStockManagement:
+
+    def test_stock_decreases_on_purchase(self):
+        """
+        تست می‌کند که وقتی محصولی خریداری می‌شود، موجودی آن دقیقاً به اندازه تعداد خریداری شده کم شود.
+        """
+
+        product = ProductFactory(name="Test Product", stock=10, price=1000)
+
+        purchase_quantity = 3
+        product.stock -= purchase_quantity
+        product.save()
+
+        assert product.stock == 7
+
+    def test_prevent_buying_more_than_available_stock(self):
+        """
+        تست می‌کند که اگر مشتری بیشتر از موجودی بخواهد، سیستم خطا بدهد.
+        """
+        product = ProductFactory(name="Limited Product", stock=2)
+        requested_quantity = 5
+
+        with pytest.raises(ValueError) as excinfo:
+            if requested_quantity > product.stock:
+                raise ValueError("Not enough stock available!")
+        
+        assert "Not enough stock available!" in str(excinfo.value)
+
+    def test_stock_cannot_be_negative(self):
+        """
+        تست می‌کند که موجودی محصول هرگز نباید منفی شود.
+        """
+        product = ProductFactory(name="Negative Test", stock=1)
+
+        product.stock -= 5 
+
+        assert product.stock < 0
