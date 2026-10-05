@@ -14,12 +14,9 @@ class Cart:
         product_id = str(product.id)
 
         if product_id not in self.cart:
-            self.cart[product_id] = {
-                'quantity': 0, 
-                'price': str(product.price)
-            }
+            self.cart[product_id] = {'quantity': 0}
         
-        if override_quantity:
+        if override_quantity is not None:
             self.cart[product_id]['quantity'] = override_quantity
         else:
             self.cart[product_id]['quantity'] += quantity or 1
@@ -41,16 +38,15 @@ class Cart:
         products = Product.objects.filter(id__in=product_ids)
         
         cart_data = {}
-        
         for product in products:
             p_id = str(product.id)
             if p_id in self.cart:
-                price_val = self.cart[p_id].get('price', '0')
-                quantity_val = self.cart[p_id].get('quantity', 0)
+                quantity_val = self.cart[p_id]['quantity']
+                price_val = product.price 
                 
                 cart_data[p_id] = {
                     'product': product,
-                    'price': Decimal(str(price_val)),
+                    'price': price_val,
                     'quantity': quantity_val
                 }
         
@@ -59,7 +55,7 @@ class Cart:
             yield item
 
     def __len__(self):
-        return sum(item['quantity'] for item in self.cart.values())
+        return sum(int(item['quantity']) for item in self.cart.values())
 
     def clear(self):
         if 'cart' in self.session:
@@ -67,47 +63,21 @@ class Cart:
         self.cart = {}
         self.session.modified = True
 
-    def add(self, product, quantity=None, override_quantity=None):
-        product_id = str(product.id)
-
-        if product_id not in self.cart:
-            self.cart[product_id] = {
-                'quantity': 0, 
-                'price': str(product.price)
-            }
-        
-        if override_quantity is not None:
-            self.cart[product_id]['quantity'] = override_quantity
-        else:
-            self.cart[product_id]['quantity'] += quantity or 1
-        
-        self.save()
-
-    def get_total_items(self):
-        return sum(int(item['quantity']) for item in self.cart.values())
-
     def get_total_price(self):
         total = Decimal('0.00')
-        for item in self.cart.values():
-            price = Decimal(item.get('price', '0'))
-            quantity = int(item.get('quantity', 0))
-            total += price * quantity
+        for item in self:
+            total += item['total_price']
         return total
 
-
     def validate_stock(self):
-
-        for item_data in self: # از __iter__ خودتان استفاده می‌کند
+        for item_data in self:
             product = item_data['product']
             requested_quantity = item_data['quantity']
             
-            # بررسی وضعیت فروش
             if not product.is_available:
                 return False, f"محصول '{product.name}' در حال حاضر قابل فروش نیست."
             
-            # بررسی موجودی انبار
             if product.stock < requested_quantity:
-                return False, f"موجودی '{product.name}' کافی نیست. فقط {product.stock} عدد از این محصول باقی مانده است."
+                return False, f"موجودی '{product.name}' کافی نیست. فقط {product.stock} عدد باقی مانده است."
                 
         return True, None
-

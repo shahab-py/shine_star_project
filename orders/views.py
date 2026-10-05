@@ -1,141 +1,101 @@
+import logging
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib import messages
 from django.urls import reverse
-from django.conf import settings
-import requests
+from django.views.decorators.http import require_POST
+from django.views import View
+from django.http import HttpResponseRedirect
+
 from .models import Order, OrderItem
-from .forms import OrderCreateForm
+from shop.models import Product
 from shop.cart import Cart
 
 
+logger = logging.getLogger(__name__)
 
-merchant_id = settings.ZARINPAL['MERCHANT_ID']
-
-@transaction.atomic
 def order_create(request):
-    if request.method == 'POST':
-        form = OrderCreateForm(request.POST)
-        if form.is_valid():
-            try:
-                cart = Cart(request)
-                if not cart:
-                    messages.warning(request, "سبد خرید شما خالی است.")
-                    return redirect('shop:cart_detail')
+    cart = Cart(request)
+    if not cart.is_empty():
+        user = request.user if request.user.is_authenticated else None
 
-                order = form.save()
-                total_order_price = 0
+        order = Order.objects.create(
+            user=user,
+            first_name=request.POST.get('first_name', ''),
+            last_name=request.POST.get('last_name', ''),
+            email=request.POST.get('email', ''),
+            address=request.POST.get('address', ''),
+            city=request.POST.get('city', ''),
+            postcode=request.POST.get('postcode', ''),
+            phone_number=request.POST.get('phone_number', ''),
+            province=request.POST.get('province', ''),
+            status='pending',
+            paid=False,
+            total_price=cart.get_total_price()
+        )
 
-                for item in cart:
-                    product = item['product']
-                    quantity = item['quantity']
-                    price = item.get('price', 0)
-                    if product.stock < quantity:
-                        raise ValueError(f"متاسفانه موجودی محصول '{product.name}' کافی نیست.")
+        for item in cart:
+            OrderItem.objects.create(
+                order=order,
+                product=item['product'],
+                price_at_purchase=item['price'],
+                quantity=item['quantity']
+            )
 
-                    OrderItem.objects.create(
-                        order=order,
-                        product=product,
-                        price_at_purchase=price,
-                        quantity=quantity
-                    )
-                    total_order_price += (price * quantity)
+        cart.clear()
 
-                order.total_price = total_order_price
-                order.save()
+        return redirect('orders:payment_start', order_id=order.id)
+    
+    messages.error(request, "سبد خرید شما خالی است.")
+    return redirect('shop:product_list')
 
-                cart.clear()
-                request.session['last_order_id'] = order.id
-                return redirect('orders:payment_start', order_id=order.id)
 
-            except ValueError as e:
-                messages.error(request, str(e))
-            except Exception as e:
-                print(f"CRITICAL ERROR in order_create: {e}")
-                messages.error(request, "خطایی در ثبت سفارش رخ داد.")
-        else:
-            messages.error(request, "اطلاعات فرم صحیح نیست.")
-    else:
-        form = OrderCreateForm()
-    return render(request, 'orders/orders/create.html', {'form': form})
+def payment_start(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    
+    if order.paid:
+        messages.info(request, "این سفارش قبلاً پرداخت شده است.")
+        return redirect('orders:order_success', order_id=order.id)
 
+    return redirect('orders:payment_verify', order_id=order.id)
 
 @transaction.atomic
 def payment_verify(request, order_id):
     order = get_object_or_404(Order, id=order_id)
-    authority = request.GET.get('Authority')
+    
+    if order.paid:
+        return redirect('orders:order_success', order_id=order.id)
 
-    if not authority:
-        messages.error(request, "شناسه تراکنش یافت نشد.")
-        return redirect('shop:home')
+    payment_success = True 
 
-    verify_payload = {
-        'merchant_id': settings.ZARINPAL['MERCHANT_ID'],
-        'amount': int(order.total_price),
-        'authority': authority,
-    }
-
-    try:
-        response = requests.post(settings.ZARINPAL['VERIFY_URL'], json=verify_payload, timeout=10)
-        result = response.json()
-
-        # بررسی موفقیت در درگاه
-        if result.get('data') and result.get('data', {}).get('code') in [100, 101]:
-            
+    if payment_success:
+        try:
             for item in order.items.all():
                 product = item.product
                 if product.stock < item.quantity:
-                    raise ValueError(f"متاسفانه در لحظه پرداخت، موجودی {product.name} تمام شد.")
-                
-                product.stock -= item.quantity
+                    raise ValueError(f"موجودی {product.name} کافی نیست.")
+                product.decrease_stock(item.quantity)
                 product.save()
 
             order.paid = True
             order.status = 'paid'
             order.save()
             
-            messages.success(request, "پرداخت با موفقیت انجام شد.")
-            return redirect('orders:order_success')
-        
-        else:
-            # مدیریت پرداخت ناموفق
-            error_msg = result.get('errors', {}).get('message', "پرداخت ناموفق بود.")
-            messages.error(request, f"پرداخت تایید نشد: {error_msg}")
-            return redirect('shop:cart_detail')
+            messages.success(request, "پرداخت موفق بود.")
+            return redirect('orders:order_success', order_id=order.id)
 
-    except ValueError as ve:
-        messages.error(request, str(ve))
-        return redirect('shop:cart_detail')
-    except Exception as e:
-        print(f"Verification System Error: {e}")
-        messages.error(request, "خطا در تایید پرداخت.")
-        return redirect('shop:cart_detail')
+        except Exception as e:
+            logger.error(f"خطا: {str(e)}")
+            messages.error(request, f"خطا در تایید نهایی: {str(e)}")
+            return redirect('shop:product_list')
+    else:
+        messages.error(request, "پرداخت ناموفق بود.")
+        return redirect('shop:product_list')
 
 
-@transaction.atomic
-def payment_start(request, order_id):
+
+def order_success(request, order_id):
+
     order = get_object_or_404(Order, id=order_id)
-    
-    payload = {
-        'merchant_id': settings.ZARINPAL['MERCHANT_ID'],
-        'amount': int(order.total_price),
-    }
-
-    try:
-        response = requests.post(settings.ZARINPAL['START_URL'], json=payload, timeout=10)
-        result = response.json()
-
-        if result.get('data') and result.get('data', {}).get('code') == 100:
-            authority = result['data']['authority']
-            zarinpal_url = result['data']['url']
-            return redirect(zarinpal_url)
-        else:
-            error_msg = result.get('errors', {}).get('message', "خطا در شروع پرداخت.")
-            messages.error(request, error_msg)
-            return redirect('shop:cart_detail')
-
-    except Exception as e:
-        print(f"Payment Start Error: {e}")
-        messages.error(request, "خطایی در اتصال به درگاه رخ داد.")
-        return redirect('shop:cart_detail')
-
+    return render(request, 'orders/order_success.html', {'order': order})

@@ -1,19 +1,13 @@
 from django.urls import path
-from . import views, views_order
-from .api_views import OrderListView
-
-
-
+from . import views, views_order, api_views
 
 app_name = 'orders'
 
 urlpatterns = [
-    path('create/', views_order.OrderCreateView.as_view(), name='order_create'),
-    path('order/success/', views_order.order_success, name='order_success'),    
-    path('create/', views_order.OrderCreateView.as_view(), name='create'),
-    path('payment/<int:order_id>/', views.payment_start, name='payment_start'),
-    path('payment/verify/<int:order_id>/', views.payment_verify, name='payment_verify'),
-    path('my-orders/', OrderListView.as_view(), name='order-list'),
-    path('payment/start/<int:order_id>/', views.payment_start, name='payment_start'),
 
+    path('create/', views_order.OrderCreateView.as_view(), name='order_create'),
+    path('success/<int:order_id>/', views.order_success, name='order_success'),    
+    path('payment/start/<int:order_id>/', views.payment_start, name='payment_start'),
+    path('payment/verify/<int:order_id>/', views.payment_verify, name='payment_verify'),
+    path('my-orders/', api_views.OrderListView.as_view(), name='order-list'),
 ]
