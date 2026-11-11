@@ -1,8 +1,11 @@
 from django.db import models
 from django.conf import settings
+from datetime import timedelta
+from django.utils import timezone
 
 
-
+def order_expiry_time():
+    return timezone.now() + timedelta(minutes=30)
 
 class Order(models.Model):
 
@@ -13,6 +16,7 @@ class Order(models.Model):
         ('shipped', 'ارسال شده'),
         ('delivered', 'تحویل شده'),
         ('cancelled', 'لغو شده'),
+        ('expired', 'منقضی شده'),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', on_delete=models.CASCADE, null=True, blank=True)
@@ -27,13 +31,31 @@ class Order(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ سفارش")
     paid = models.BooleanField(default=False, verbose_name="پرداخت شده")
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0) 
+    expires_at = models.DateTimeField(
+    default=order_expiry_time,
+    db_index=True,
+    verbose_name="زمان انقضای سفارش"
+    )
 
+    payment_authority = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="شناسه پرداخت"
+    )
+
+    payment_ref_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        verbose_name="شماره پیگیری پرداخت"
+    )
     class Meta:
         verbose_name = "سفارش"
         verbose_name_plural = "سفارش‌ها"
 
     def __str__(self):
-        return f"Order #{self.id} - {self.first_name} {self.last_name}"
+        return f"Order #{self.id} - {self.get_status_display()}"
 
     @property
     def get_total_cost(self):
@@ -44,9 +66,6 @@ class Order(models.Model):
         choices=STATUS_CHOICES, 
         default='pending'
     )
-
-    def __str__(self):
-        return f"Order #{self.id} - {self.get_status_display()}"
 
 
 class OrderItem(models.Model):
