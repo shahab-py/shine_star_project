@@ -48,6 +48,9 @@ def test_create_order_success():
     assert order.status == "pending"
     assert order.paid is False
 
+    assert order.user is None
+    assert order.id in request.session["guest_order_ids"]
+
     order_item = order.items.first()
 
     assert order_item.product == product
@@ -220,3 +223,170 @@ def test_create_order_with_invalid_quantity():
         create_order_from_cart(request, customer_data)
 
     assert Order.objects.count() == 0
+
+@pytest.mark.django_db
+def test_create_order_with_invalid_product_id():
+    request = RequestFactory().post("/orders/create/")
+    request.user = AnonymousUser()
+
+    middleware = SessionMiddleware(lambda req: None)
+    middleware.process_request(request)
+    request.session.save()
+
+    request.session["cart"] = {
+        "abc": {
+            "quantity": 1
+        }
+    }
+    request.session.save()
+
+    customer_data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "email": "test@example.com",
+        "address": "Test Address",
+        "city": "Tehran",
+        "postcode": "1234567890",
+        "phone_number": "09123456789",
+    }
+
+    with pytest.raises(ValidationError):
+        create_order_from_cart(request, customer_data)
+
+    assert Order.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_create_order_with_negative_product_id():
+    request = RequestFactory().post("/orders/create/")
+    request.user = AnonymousUser()
+
+    middleware = SessionMiddleware(lambda req: None)
+    middleware.process_request(request)
+    request.session.save()
+
+    request.session["cart"] = {
+        "-5": {
+            "quantity": 1
+        }
+    }
+    request.session.save()
+
+    customer_data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "email": "test@example.com",
+        "address": "Test Address",
+        "city": "Tehran",
+        "postcode": "1234567890",
+        "phone_number": "09123456789",
+    }
+
+    with pytest.raises(ValidationError):
+        create_order_from_cart(request, customer_data)
+
+    assert Order.objects.count() == 0
+
+@pytest.mark.django_db
+def test_create_order_with_zero_price():
+    product = ProductFactory(
+        price=0,
+        stock=10,
+        is_available=True,
+    )
+
+    request = RequestFactory().post("/orders/create/")
+    request.user = AnonymousUser()
+
+    middleware = SessionMiddleware(lambda req: None)
+    middleware.process_request(request)
+    request.session.save()
+
+    cart = Cart(request)
+    cart.add(product, quantity=1)
+
+    customer_data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "email": "test@example.com",
+        "address": "Test Address",
+        "city": "Tehran",
+        "postcode": "1234567890",
+        "phone_number": "09123456789",
+    }
+
+    with pytest.raises(ValidationError):
+        create_order_from_cart(request, customer_data)
+
+    assert Order.objects.count() == 0
+
+@pytest.mark.django_db
+def test_create_order_with_negative_price():
+    product = ProductFactory(
+            price=0,
+            stock=10,
+            is_available=True,
+        )
+    request = RequestFactory().post("/orders/create/")
+    request.user = AnonymousUser()
+    middleware = SessionMiddleware(lambda req: None)
+    middleware.process_request(request)
+    request.session.save()
+    cart = Cart(request)
+    cart.add(product, quantity=1)
+    customer_data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "email": "test@example.com",
+        "address": "Test Address",
+        "city": "Tehran",
+        "postcode": "1234567890",
+        "phone_number": "09123456789",
+    }
+
+    with pytest.raises(ValidationError):
+        create_order_from_cart(request, customer_data)
+
+    assert Order.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_authenticated_order_not_added_to_guest_session():
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="testuser",
+        email="test@example.com",
+        password="testpassword123",
+    )
+
+    product = ProductFactory(
+        price=100000,
+        stock=10,
+        is_available=True,
+    )
+
+    request = RequestFactory().post("/orders/create/")
+    request.user = user
+
+    middleware = SessionMiddleware(lambda req: None)
+    middleware.process_request(request)
+    request.session.save()
+
+    cart = Cart(request)
+    cart.add(product, quantity=1)
+
+    customer_data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "email": "test@example.com",
+        "address": "Test Address",
+        "city": "Tehran",
+        "postcode": "1234567890",
+        "phone_number": "09123456789",
+    }
+
+    order = create_order_from_cart(request, customer_data)
+    assert order.user == user
+    assert "guest_order_ids" not in request.session

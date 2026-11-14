@@ -1,13 +1,9 @@
-
 from decimal import Decimal
-
 from django.core.exceptions import ValidationError
 from django.db import transaction
-
 from .models import Order, OrderItem
 from shop.models import Product
 from shop.cart import Cart
-
 
 @transaction.atomic
 def create_order_from_cart(request, customer_data):
@@ -18,7 +14,21 @@ def create_order_from_cart(request, customer_data):
     if not cart_items:
         raise ValidationError("سبد خرید خالی است.")
 
-    product_ids = [int(product_id) for product_id in cart_items]
+    try:
+        product_ids = [
+            int(product_id)
+            for product_id in cart_items
+        ]
+
+    except (ValueError, TypeError):
+        raise ValidationError(
+            "شناسه یکی از محصولات سبد خرید معتبر نیست."
+        )
+
+    if any(product_id <= 0 for product_id in product_ids):
+        raise ValidationError(
+            "شناسه محصولات باید عددی مثبت باشد."
+        )
 
     products = Product.objects.select_for_update().filter(
         id__in=product_ids
@@ -38,6 +48,10 @@ def create_order_from_cart(request, customer_data):
 
     for product_id, cart_item in cart_items.items():
         product = products_by_id[int(product_id)]
+        if product.price <= 0:
+            raise ValidationError(
+                f"قیمت محصول {product.name} معتبر نیست."
+            )
         try:
             quantity = int(cart_item["quantity"])
 
@@ -92,5 +106,15 @@ def create_order_from_cart(request, customer_data):
             price_at_purchase=item["price"],
             quantity=item["quantity"],
         )
+
+    if order.user_id is None:
+        guest_order_ids = request.session.get(
+            "guest_order_ids",
+            [],
+        )
+
+        guest_order_ids.append(order.id)
+
+        request.session["guest_order_ids"] = guest_order_ids[-20:]
 
     return order
