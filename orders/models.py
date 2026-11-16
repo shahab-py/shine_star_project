@@ -17,6 +17,7 @@ class Order(models.Model):
         ('delivered', 'تحویل شده'),
         ('cancelled', 'لغو شده'),
         ('expired', 'منقضی شده'),
+        ('payment_review', 'نیازمند بررسی پرداخت'),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', on_delete=models.CASCADE, null=True, blank=True)
@@ -35,6 +36,12 @@ class Order(models.Model):
     default=order_expiry_time,
     db_index=True,
     verbose_name="زمان انقضای سفارش"
+    )
+
+    payment_request_started_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="زمان شروع درخواست پرداخت",
     )
 
     payment_authority = models.CharField(

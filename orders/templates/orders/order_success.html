@@ -1,33 +1,66 @@
+
 {% extends 'base.html' %}
+{% load humanize %}
+
 {% block content %}
-{% load humanize %} 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6 text-center">
             <div class="card shadow">
                 <div class="card-body">
-                    <h2 class="text-success mb-4">🎉 سفارش با موفقیت ثبت شد!</h2>
-                    <h1>سفارش شما با موفقیت ثبت شد!</h1>
-                    <div>
-                        <p>شماره سفارش شما: {{ order.id }}</p>
 
-                        <h3>جزئیات سفارش:</h3>
-                            {% for item in order.items.all %}
-                                <p>
-                                    {{ item.product.name }} - 
-                                    تعداد: {{ item.quantity }} - 
-                                    {% widthratio item.price_at_purchase 1 item.quantity %} تومان
-                                </p>
-                            {% endfor %}
-                            {% if order %}
-                                <p>جمع کل سفارش: {{ order.total_price|floatformat:0|intcomma }} تومان</p>
-                            {% else %}
-                                <p>سفارشی یافت نشد.</p>
-                            {% endif %}
-                    </div>   
-                    <p class="lead">ممنون از اینکه از Shine Star خرید کردید. سفارش شما در حال پردازش است.</p>
+                    {% if order.status == 'payment_review' %}
+                        <h2 class="text-warning mb-4">
+                            پرداخت تأیید شد؛ سفارش نیازمند بررسی است.
+                        </h2>
+                        <p class="lead">
+                            مبلغ سفارش شما توسط درگاه تأیید شده است،
+                            اما برای تأمین موجودی محصولات نیاز به بررسی داریم.
+                        </p>
+                        <p>
+                            لطفاً شماره سفارش را برای پیگیری نگه دارید.
+                        </p>
+
+                    {% elif order.paid %}
+                        <h2 class="text-success mb-4">
+                            🎉 پرداخت با موفقیت تأیید شد!
+                        </h2>
+                        <p class="lead">
+                            پرداخت سفارش شما با موفقیت تأیید شده است.
+                        </p>
+
+                    {% else %}
+                        <h2 class="text-warning mb-4">
+                            وضعیت سفارش شما نیازمند بررسی است.
+                        </h2>
+                        <p class="lead">
+                            هنوز پرداخت این سفارش تأیید نشده است.
+                        </p>
+                    {% endif %}
+
+                    <p>شماره سفارش شما: {{ order.id }}</p>
+
+                    <h3>جزئیات سفارش:</h3>
+
+                    {% for item in order.items.all %}
+                        <p>
+                            {{ item.product.name }} -
+                            تعداد: {{ item.quantity }} -
+                            {% widthratio item.price_at_purchase 1 item.quantity %} تومان
+                        </p>
+                    {% endfor %}
+
+                    <p>
+                        جمع کل سفارش:
+                        {{ order.total_price|floatformat:0|intcomma }} تومان
+                    </p>
+
                     <hr>
-                    <a href="{% url 'shop:home' %}" class="btn btn-primary">بازگشت به صفحه اصلی</a>
+
+                    <a href="{% url 'shop:home' %}" class="btn btn-primary">
+                        بازگشت به صفحه اصلی
+                    </a>
+
                 </div>
             </div>
         </div>

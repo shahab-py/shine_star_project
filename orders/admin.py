@@ -1,8 +1,9 @@
+
 from django.contrib import admin
 from .models import Order, OrderItem
 from django.utils.html import format_html
 
-# Register your models here.
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     raw_id_fields = ['product']
@@ -13,9 +14,23 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
 
-    list_display = ['id', 'get_full_name', 'phone_number', 'paid', 'display_paid_status', 'created']
-    list_filter = ['paid', 'created', 'city', 'province']
-    list_editable = ['paid']
+    list_display = [
+        'id',
+        'get_full_name',
+        'phone_number',
+        'paid',
+        'display_order_status',
+        'created',
+    ]
+
+    list_filter = [
+        'status',
+        'paid',
+        'created',
+        'city',
+        'province',
+    ]
+
     search_fields = ['first_name', 'last_name', 'phone_number']
     inlines = [OrderItemInline]
     ordering = ['-created']
@@ -23,13 +38,32 @@ class OrderAdmin(admin.ModelAdmin):
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
+
     get_full_name.short_description = 'نام و نام خانوادگی'
 
-    def display_paid_status(self, obj):
-        color = 'green' if obj.paid else 'red'
-        text = '✅ پرداخت شده' if obj.paid else '❌ پرداخت نشده'
-        return format_html('<span style="color: {};">{}</span>', color, text)
-    display_paid_status.short_description = 'وضعیت (رنگی)'
+    @admin.display(description='وضعیت سفارش')
+    def display_order_status(self, obj):
+        status_colors = {
+            'pending': 'orange',
+            'paid': 'green',
+            'processing': 'blue',
+            'shipped': 'blue',
+            'delivered': 'green',
+            'cancelled': 'red',
+            'expired': 'gray',
+            'payment_review': 'darkorange',
+        }
 
+        color = status_colors.get(obj.status, 'black')
+        text = obj.get_status_display()
 
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color,
+            text,
+        )
 
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(super().get_readonly_fields(request, obj))
+        readonly.extend(['paid', 'status'])
+        return readonly
