@@ -8,7 +8,7 @@
         <div class="col-md-6 text-center">
             <div class="card shadow">
                 <div class="card-body">
-
+                    
                     {% if order.status == 'payment_review' %}
                         <h2 class="text-warning mb-4">
                             پرداخت تأیید شد؛ سفارش نیازمند بررسی است.
@@ -56,6 +56,19 @@
                     </p>
 
                     <hr>
+
+                    {% if order.status == 'pending' and not order.paid and not order.payment_request_started_at and not order.payment_authority %}
+                        <form method="post"
+                            action="{% url 'orders:order_cancel' order.id %}"
+                            class="mb-3">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="btn btn-danger"
+                                    onclick="return confirm('آیا از لغو سفارش مطمئن هستید؟');">
+                                لغو سفارش
+                            </button>
+                        </form>
+                    {% endif %}
 
                     <a href="{% url 'shop:home' %}" class="btn btn-primary">
                         بازگشت به صفحه اصلی

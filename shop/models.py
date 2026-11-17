@@ -38,11 +38,16 @@ class Product(models.Model):
 
 
     def decrease_stock(self, quantity):
+        if quantity <= 0:
+            raise ValidationError("تعداد کاهش موجودی باید مثبت باشد.")
+
         if quantity > self.stock:
-            raise ValidationError(f"موجودی کافی برای محصول {self.name} نیست.")
-        
+            raise ValidationError(
+                f"موجودی کافی برای محصول {self.name} نیست."
+            )
+
         self.stock -= quantity
-        self.save()
+        self.save(update_fields=["stock"])
 
     def __str__(self):
         return self.name

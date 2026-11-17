@@ -20,7 +20,7 @@ class Order(models.Model):
         ('payment_review', 'نیازمند بررسی پرداخت'),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', on_delete=models.SET_NULL, null=True, blank=True)
     first_name = models.CharField(max_length=50, verbose_name="نام")
     last_name = models.CharField(max_length=50, verbose_name="نام خانوادگی")
     email = models.EmailField(verbose_name="ایمیل")
@@ -31,7 +31,7 @@ class Order(models.Model):
     province = models.CharField(max_length=50, blank=True, null=True, verbose_name="استان")
     created = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ سفارش")
     paid = models.BooleanField(default=False, verbose_name="پرداخت شده")
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0) 
+    total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0) 
     expires_at = models.DateTimeField(
     default=order_expiry_time,
     db_index=True,
@@ -77,18 +77,22 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey('shop.Product', related_name='order_items', on_delete=models.CASCADE)
+    product = models.ForeignKey('shop.Product', related_name='order_items', on_delete=models.PROTECT)
     price_at_purchase = models.DecimalField(
             max_digits=12, 
-            decimal_places=0, 
-            null=True, 
-            blank=True, 
+            decimal_places=0,
             verbose_name="قیمت در لحظه خرید"
         )
     quantity = models.PositiveIntegerField(default=1, verbose_name="تعداد")
     class Meta:
         verbose_name = "آیتم سفارش"
         verbose_name_plural = "آیتم‌های سفارش"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(quantity__gt=0),
+                name="order_item_quantity_gt_zero",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"

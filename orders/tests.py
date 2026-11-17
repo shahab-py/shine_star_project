@@ -235,6 +235,57 @@ def test_payment_verify_failure(mock_post, client, monkeypatch):
     assert response.url == reverse('shop:product_list')
     mock_post.assert_called_once()
 
+
+@pytest.mark.django_db
+@patch("orders.views.requests.post")
+def test_payment_verify_timeout_does_not_mark_order_paid_or_decrease_stock(
+    mock_post, client, monkeypatch
+):
+    monkeypatch.setattr(settings, "ZARINPAL", {
+        "MERCHANT_ID": "test_id",
+        "VERIFY_URL": "https://sandbox.zarinpal.com/pg/v4/payment/verify.json",
+    })
+
+    product = ProductFactory(stock=10)
+
+    order = OrderFactory(
+        paid=False,
+        status="pending",
+        payment_authority="timeout_authority",
+        payment_ref_id="",
+    )
+
+    OrderItem.objects.create(
+        order=order,
+        product=product,
+        price_at_purchase=100,
+        quantity=2,
+    )
+
+    order.total_price = 200
+    order.save(update_fields=["total_price"])
+
+    mock_post.side_effect = requests.Timeout("Connection timed out")
+
+    url = reverse("orders:payment_verify", args=[order.id])
+    response = client.get(url, {
+        "Authority": "timeout_authority",
+        "Status": "OK",
+    })
+
+    order.refresh_from_db()
+    product.refresh_from_db()
+
+    assert response.status_code == 302
+    assert response.url == reverse("shop:product_list")
+    assert order.paid is False
+    assert order.status == "pending"
+    assert order.payment_ref_id == ""
+    assert product.stock == 10
+
+    mock_post.assert_called_once()
+
+
 @pytest.mark.django_db
 @patch('orders.views.requests.post')
 def test_paid_order_rejects_wrong_authority(

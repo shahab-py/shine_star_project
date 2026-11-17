@@ -58,7 +58,7 @@ def test_create_order_success():
     assert order_item.price_at_purchase == 100000
 
     assert product.stock == 10
-    assert len(Cart(request)) == 2
+    assert len(Cart(request)) == 0
 
 
 @pytest.mark.django_db

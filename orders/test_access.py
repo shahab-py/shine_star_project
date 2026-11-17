@@ -13,7 +13,9 @@ from orders.factories import OrderFactory
 
 def make_request(user=None, guest_order_ids=None):
     request = RequestFactory().get("/")
-    request.user = user or AnonymousUser()
+    request.user = (
+        user if user is not None else AnonymousUser()
+    )
 
     middleware = SessionMiddleware(lambda req: None)
     middleware.process_request(request)

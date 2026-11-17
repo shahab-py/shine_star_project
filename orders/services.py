@@ -117,4 +117,33 @@ def create_order_from_cart(request, customer_data):
 
         request.session["guest_order_ids"] = guest_order_ids[-20:]
 
+    cart.clear()
+
     return order
+
+def cancel_order(order_id):
+    with transaction.atomic():
+        order = (
+            Order.objects
+            .select_for_update()
+            .filter(id=order_id)
+            .first()
+        )
+
+        if order is None:
+            raise ValidationError("سفارش پیدا نشد.")
+
+        if (
+            order.status != "pending"
+            or order.paid
+            or order.payment_request_started_at is not None
+            or order.payment_authority != ""
+        ):
+            raise ValidationError(
+                "این سفارش در حال حاضر قابل لغو نیست."
+            )
+
+        order.status = "cancelled"
+        order.save(update_fields=["status"])
+
+        return order

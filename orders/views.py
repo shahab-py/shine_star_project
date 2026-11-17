@@ -1,5 +1,6 @@
 import logging
 import requests
+from .services import cancel_order
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
@@ -153,7 +154,14 @@ def payment_start(request, order_id):
             json=payload,
             timeout=15,
         )
-        response.raise_for_status()
+        if not response.ok:
+            logger.error(
+                "ZarinPal response: status=%s body=%s",
+                response.status_code,
+                response.text[:1000],
+            )
+            response.raise_for_status()
+
         result = response.json()
 
     except (requests.RequestException, ValueError):
@@ -494,3 +502,23 @@ def payment_verify(request, order_id):
 def order_success(request, order_id):
     order = get_accessible_order(request, order_id)
     return render(request, 'orders/order_success.html', {'order': order})
+
+
+
+@require_POST
+def order_cancel(request, order_id):
+    order = get_accessible_order(request, order_id)
+
+    try:
+        cancel_order(order.id)
+
+    except ValidationError as exc:
+        messages.error(request, " ".join(exc.messages))
+
+    else:
+        messages.success(request, "سفارش با موفقیت لغو شد.")
+
+    return redirect(
+        "orders:order_success",
+        order_id=order.id,
+    )
